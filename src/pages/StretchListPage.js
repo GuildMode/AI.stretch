@@ -221,7 +221,7 @@ const StretchListPage = () => {
       const equipmentMatch = filters.equipment.length === 0 || filters.equipment.includes(stretch.equipment);
       return targetAreaMatch && equipmentMatch;
     });
-  }, [filters]);
+  }, [filters, stretches]);
 
   // パネルの外側をクリックしたら閉じる
   useEffect(() => {
