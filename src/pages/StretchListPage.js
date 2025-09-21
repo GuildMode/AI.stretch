@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import styled from 'styled-components';
 import { Link, useNavigate } from 'react-router-dom';
-import { STRETCH_DATA } from '../data/STRETCH_DATA';
+
 
 import { useStretchStore } from '../store/stretchStore';
 
@@ -216,7 +216,7 @@ const StretchListPage = () => {
 
   // フィルタリングされたストレッチリスト
   const filteredStretches = useMemo(() => {
-    return STRETCH_DATA.filter(stretch => {
+    return stretches.filter(stretch => {
       const targetAreaMatch = filters.targetArea.length === 0 || stretch.targetArea.some(area => filters.targetArea.includes(area));
       const equipmentMatch = filters.equipment.length === 0 || filters.equipment.includes(stretch.equipment);
       return targetAreaMatch && equipmentMatch;

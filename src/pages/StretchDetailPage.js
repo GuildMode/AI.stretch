@@ -1,7 +1,7 @@
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import styled from 'styled-components';
-import { STRETCH_DATA } from '../data/STRETCH_DATA.js';
+
 
 import { useStretchStore } from '../store/stretchStore';
 

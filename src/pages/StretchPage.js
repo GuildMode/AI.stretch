@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
-import { STRETCH_DATA } from '../data/STRETCH_DATA';
+import { useStretchStore } from '../store/stretchStore';
 
 // --- Icons ---
 const FilterIcon = () => (
@@ -171,10 +171,11 @@ const StretchPage = () => {
     equipment: [],
   });
   const filterPanelRef = useRef(null);
+  const stretches = useStretchStore(state => state.stretches);
 
   // フィルターの選択肢をデータから動的に生成
-  const targetAreaOptions = useMemo(() => [...new Set(STRETCH_DATA.flatMap(s => s.targetArea))], []);
-  const equipmentOptions = useMemo(() => [...new Set(STRETCH_DATA.map(s => s.equipment).filter(Boolean))], []);
+  const targetAreaOptions = useMemo(() => [...new Set(stretches.flatMap(s => s.targetArea))], [stretches]);
+  const equipmentOptions = useMemo(() => [...new Set(stretches.map(s => s.equipment).filter(Boolean))], [stretches]);
 
   // チェックボックス変更ハンドラ
   const handleCheckboxChange = (category, value) => {
@@ -189,12 +190,12 @@ const StretchPage = () => {
 
   // フィルタリングされたストレッチリスト
   const filteredStretches = useMemo(() => {
-    return STRETCH_DATA.filter(stretch => {
+    return stretches.filter(stretch => {
       const targetAreaMatch = filters.targetArea.length === 0 || stretch.targetArea.some(area => filters.targetArea.includes(area));
       const equipmentMatch = filters.equipment.length === 0 || filters.equipment.includes(stretch.equipment);
       return targetAreaMatch && equipmentMatch;
     });
-  }, [filters]);
+  }, [filters, stretches]);
 
   // パネルの外側をクリックしたら閉じる
   useEffect(() => {

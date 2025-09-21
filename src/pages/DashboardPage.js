@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { Link, useNavigate } from 'react-router-dom';
-import { STRETCH_DATA } from '../data/STRETCH_DATA';
+
 import AIChat from '../components/AIChat';
 import { useUserStore } from '../store/userStore';
 import { useStretchStore } from '../store/stretchStore';
