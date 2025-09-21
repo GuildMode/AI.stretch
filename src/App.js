@@ -1,8 +1,8 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import styled from 'styled-components';
 import { useStretchStore } from './store/stretchStore';
-
+import { initializeFirebase } from './firebase';
 import useUserDataSync from './hooks/useUserDataSync';
 
 // Pages
@@ -25,13 +25,43 @@ const AppContainer = styled.div`
   padding: 0 20px;
 `;
 
-function App() {
-  useUserDataSync();
-  const initializeStretches = useStretchStore(state => state.initializeStretches);
+const LoadingScreen = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  font-size: 1.5rem;
+`;
 
+function App() {
+  const [isFirebaseInitialized, setFirebaseInitialized] = useState(false);
+
+  // This effect runs once on app startup to initialize Firebase.
+  useEffect(() => {
+    initializeFirebase().then(success => {
+      if (success) {
+        setFirebaseInitialized(true);
+      }
+      // If initialization fails, the app will be stuck on the loading screen.
+      // A more robust app would show an error message.
+    });
+  }, []);
+
+  // This effect initializes the stretch data from the local data file.
+  const initializeStretches = useStretchStore(state => state.initializeStretches);
   useEffect(() => {
     initializeStretches();
   }, [initializeStretches]);
+
+  // This custom hook syncs user data with Firestore or localStorage.
+  // It will only run after Firebase is initialized, because the authStore
+  // isLoading state will prevent it from running immediately.
+  useUserDataSync();
+
+  // Render a loading screen until Firebase is ready.
+  if (!isFirebaseInitialized) {
+    return <LoadingScreen>アプリを初期化しています...</LoadingScreen>;
+  }
 
   return (
     <Router>
@@ -46,7 +76,9 @@ function App() {
             <Route path="/stretch/play" element={<StretchExecutionPage />} />
             <Route path="/stretch/:id" element={<StretchDetailPage />} />
             <Route path="/profile" element={<ProfilePage />} />
-            <Route path="/developer" element={<DeveloperPage />} />
+            {process.env.NODE_ENV === 'development' && (
+              <Route path="/developer" element={<DeveloperPage />} />
+            )}
           </Routes>
         </AppContainer>
       </main>

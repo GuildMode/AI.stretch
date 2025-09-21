@@ -1,7 +1,7 @@
 import React from 'react';
 import styled, { keyframes } from 'styled-components';
 import { useNavigate } from 'react-router-dom';
-import { auth, googleProvider } from '../firebase';
+import { getFirebaseAuth, googleProvider } from '../firebase';
 import { signInWithPopup } from 'firebase/auth';
 import useAuthStore from '../store/authStore';
 
@@ -79,7 +79,7 @@ const HomePage = () => {
 
   const handleGoogleLogin = async () => {
     try {
-      await signInWithPopup(auth, googleProvider);
+      await signInWithPopup(getFirebaseAuth(), googleProvider);
       // onAuthStateChanged in authStore will handle navigation and state updates
       // But we can navigate immediately for a better user experience.
       navigate('/dashboard');

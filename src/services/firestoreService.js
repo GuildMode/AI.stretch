@@ -1,5 +1,5 @@
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
-import { db } from '../firebase';
+import { getFirebaseDb } from '../firebase';
 
 const usersCollection = 'users';
 
@@ -10,7 +10,7 @@ const usersCollection = 'users';
  */
 export const getUserDocument = async (userId) => {
   if (!userId) return null;
-  const userDocRef = doc(db, usersCollection, userId);
+  const userDocRef = doc(getFirebaseDb(), usersCollection, userId);
   try {
     const docSnap = await getDoc(userDocRef);
     if (docSnap.exists()) {
@@ -32,7 +32,7 @@ export const getUserDocument = async (userId) => {
  */
 export const updateUserDocument = async (userId, data) => {
   if (!userId) return;
-  const userDocRef = doc(db, usersCollection, userId);
+  const userDocRef = doc(getFirebaseDb(), usersCollection, userId);
   try {
     // Using setDoc with merge: true will create the document if it doesn't exist,
     // and merge the new data with existing data if it does.

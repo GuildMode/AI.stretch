@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { auth } from '../firebase';
+import { getFirebaseAuth } from '../firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 
 const useAuthStore = create((set, get) => ({
@@ -23,7 +23,7 @@ const useAuthStore = create((set, get) => ({
 
 // This part is crucial. It listens to real-time auth changes from Firebase.
 // When the app first loads, this checks if the user is already signed in.
-onAuthStateChanged(auth, (user) => {
+onAuthStateChanged(getFirebaseAuth(), (user) => {
   if (user) {
     // User is signed in, update the store with a simplified user object
     const simplifiedUser = {

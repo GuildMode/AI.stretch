@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import useUserStore from '../store/userStore';
 import useUiStore from '../store/uiStore';
 import useAuthStore from '../store/authStore';
-import { auth } from '../firebase';
+import { getFirebaseAuth } from '../firebase';
 import { signOut } from 'firebase/auth';
 
 // --- STYLED COMPONENTS ---
@@ -156,7 +156,7 @@ const ProfilePage = () => {
 
   const handleLogout = async () => {
     try {
-      await signOut(auth);
+      await signOut(getFirebaseAuth());
       navigate('/');
     } catch (error) {
       console.error("Error signing out: ", error);

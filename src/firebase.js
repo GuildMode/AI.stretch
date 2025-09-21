@@ -2,22 +2,72 @@ import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
-// Your web app's Firebase configuration is read from environment variables
-const firebaseConfig = {
-  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
-  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.REACT_APP_FIREBASE_APP_ID
-};
+// This module now follows a singleton pattern to ensure Firebase is only initialized once.
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
+let firebaseApp;
+let firebaseAuth;
+let firebaseDb;
+let isInitialized = false;
 
-// Initialize and export Firebase services
-export const auth = getAuth(app);
-export const db = getFirestore(app);
+// The GoogleAuthProvider can be created and exported immediately.
 export const googleProvider = new GoogleAuthProvider();
 
-export default app;
+/**
+ * Fetches the Firebase config from our secure serverless function and initializes the app.
+ * This function must be called once at the root of the application before any other
+ * Firebase services are used.
+ * @returns {Promise<boolean>} A promise that resolves to true on successful initialization.
+ */
+export const initializeFirebase = async () => {
+  if (isInitialized) {
+    return true;
+  }
+
+  try {
+    const response = await fetch('/api/getFirebaseConfig');
+    if (!response.ok) {
+      throw new Error(`Failed to fetch Firebase config: ${response.status} ${response.statusText}`);
+    }
+    const firebaseConfig = await response.json();
+
+    if (!firebaseConfig.apiKey) {
+        throw new Error("Fetched Firebase config is invalid or empty.");
+    }
+
+    firebaseApp = initializeApp(firebaseConfig);
+    firebaseAuth = getAuth(firebaseApp);
+    firebaseDb = getFirestore(firebaseApp);
+    
+    isInitialized = true;
+    console.log("Firebase initialized successfully.");
+    return true;
+  } catch (error) {
+    console.error("Firebase initialization failed critically:", error);
+    // This is a critical error, so we might want to display a global error message.
+    return false;
+  }
+};
+
+/**
+ * Getter for the Firebase Auth instance.
+ * @returns {import("firebase/auth").Auth} The Firebase Auth instance.
+ * @throws {Error} If called before Firebase is initialized.
+ */
+export const getFirebaseAuth = () => {
+  if (!isInitialized) {
+    throw new Error("Firebase has not been initialized. Call initializeFirebase() at the app root.");
+  }
+  return firebaseAuth;
+};
+
+/**
+ * Getter for the Firestore DB instance.
+ * @returns {import("firebase/firestore").Firestore} The Firestore instance.
+ * @throws {Error} If called before Firebase is initialized.
+ */
+export const getFirebaseDb = () => {
+  if (!isInitialized) {
+    throw new Error("Firebase has not been initialized. Call initializeFirebase() at the app root.");
+  }
+  return firebaseDb;
+};
