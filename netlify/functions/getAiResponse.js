@@ -79,7 +79,15 @@ ${userInput}
     }
 
     const responseData = await geminiResponse.json();
-    const jsonResponse = responseData.candidates[0].content.parts[0].text;
+    const jsonResponse = responseData?.candidates?.[0]?.content?.parts?.[0]?.text;
+
+    if (!jsonResponse) {
+      console.error("Gemini API response is missing expected content.", responseData);
+      return {
+        statusCode: 500,
+        body: JSON.stringify({ text: 'AIから予期せぬ形式の応答がありました。管理者に連絡してください。', suggestions: null }),
+      };
+    }
 
     return {
       statusCode: 200,
