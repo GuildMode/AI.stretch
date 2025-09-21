@@ -1,6 +1,9 @@
 import React from 'react';
 import styled, { keyframes } from 'styled-components';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { auth, googleProvider } from '../firebase';
+import { signInWithPopup } from 'firebase/auth';
+import useAuthStore from '../store/authStore';
 
 const fadeIn = keyframes`
   from {
@@ -37,9 +40,12 @@ const Subtitle = styled.p`
   max-width: 600px;
 `;
 
-const CTAButton = styled(Link)`
-  background-color: #333333;
-  color: #FFFFFF;
+const ButtonContainer = styled.div`
+  display: flex;
+  gap: 1rem;
+`;
+
+const CTAButton = styled.button`
   border: none;
   padding: 15px 35px;
   font-size: 1.1rem;
@@ -47,20 +53,55 @@ const CTAButton = styled(Link)`
   cursor: pointer;
   border-radius: 8px;
   text-decoration: none;
-  transition: transform 0.2s ease, background-color 0.3s ease;
+  transition: transform 0.2s ease, background-color 0.3s ease, box-shadow 0.2s ease;
 
   &:hover {
-    background-color: #000;
     transform: translateY(-3px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
   }
 `;
 
+const GoogleButton = styled(CTAButton)`
+  background-color: #4285F4;
+  color: #FFFFFF;
+  &:hover { background-color: #357ae8; }
+`;
+
+const GuestButton = styled(CTAButton)`
+  background-color: #e0e0e0;
+  color: #333;
+  &:hover { background-color: #d5d5d5; }
+`;
+
 const HomePage = () => {
+  const navigate = useNavigate();
+  const setGuest = useAuthStore(state => state.setGuest);
+
+  const handleGoogleLogin = async () => {
+    try {
+      await signInWithPopup(auth, googleProvider);
+      // onAuthStateChanged in authStore will handle navigation and state updates
+      // But we can navigate immediately for a better user experience.
+      navigate('/dashboard');
+    } catch (error) {
+      console.error("Error during Google login:", error);
+      // Handle errors here, e.g., show a notification to the user
+    }
+  };
+
+  const handleGuestLogin = () => {
+    setGuest();
+    navigate('/dashboard');
+  };
+
   return (
     <HomeContainer>
       <Title>AI.stretch</Title>
       <Subtitle>AIがあなたのためのストレッチを提案するパーソナルトレーナー</Subtitle>
-      <CTAButton to="/dashboard">無料で始める</CTAButton>
+      <ButtonContainer>
+        <GoogleButton onClick={handleGoogleLogin}>Googleでログイン</GoogleButton>
+        <GuestButton onClick={handleGuestLogin}>ゲストとして始める</GuestButton>
+      </ButtonContainer>
     </HomeContainer>
   );
 };

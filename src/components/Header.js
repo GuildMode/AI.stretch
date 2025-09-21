@@ -1,7 +1,7 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { useUserStore } from '../store/userStore';
+import useAuthStore from '../store/authStore';
 
 const HeaderContainer = styled.header`
   padding: 20px 40px;
@@ -10,6 +10,7 @@ const HeaderContainer = styled.header`
   display: flex;
   justify-content: space-between;
   align-items: center;
+  height: 80px;
 `;
 
 const Logo = styled(NavLink)`
@@ -37,7 +38,6 @@ const StyledNavLink = styled(NavLink)`
     color: #000;
   }
 
-  // NavLinkがアクティブな（現在のページと一致する）場合に適用されるスタイル
   &.active {
     color: #3498db;
     &::after {
@@ -52,8 +52,35 @@ const StyledNavLink = styled(NavLink)`
   }
 `;
 
-const LogoutButton = styled.button`
-  background-color: #f44336;
+const AuthSection = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+`;
+
+const UserProfileLink = styled(NavLink)`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: #333;
+  padding: 5px 10px;
+  border-radius: 20px;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: #f0f0f0;
+  }
+`;
+
+const UserAvatar = styled.img`
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+`;
+
+const LoginButton = styled.button`
+  background-color: #3498db;
   color: white;
   border: none;
   padding: 8px 16px;
@@ -64,26 +91,54 @@ const LogoutButton = styled.button`
   transition: background-color 0.2s ease-in-out;
 
   &:hover {
-    background-color: #d32f2f;
+    background-color: #2980b9;
   }
 `;
 
 const Header = () => {
-  const reset = useUserStore((state) => state.reset);
+  const { user, isGuest, isLoading } = useAuthStore();
+  const navigate = useNavigate();
 
-  const handleLogout = () => {
-    reset();
-    // 必要に応じて、ホームページやログインページにリダイレクトする処理を追加
+  const handleLogin = () => {
+    // Navigate to home page to login
+    navigate('/');
+  }
+
+  const renderAuthSection = () => {
+    if (isLoading) {
+      return null; // Or a loading spinner
+    }
+
+    if (user) {
+      return (
+        <UserProfileLink to="/profile">
+          <UserAvatar src={user.photoURL} alt={user.displayName} />
+          <span>{user.displayName}</span>
+        </UserProfileLink>
+      );
+    }
+
+    if (isGuest) {
+      return <LoginButton onClick={handleLogin}>ログイン</LoginButton>;
+    }
+
+    return null; // Not logged in and not a guest
   };
 
   return (
     <HeaderContainer>
-      <Logo to="/">AI.stretch</Logo>
+      <Logo to={user || isGuest ? '/dashboard' : '/'}>AI.stretch</Logo>
       <Nav>
-        <StyledNavLink to="/dashboard">ダッシュボード</StyledNavLink>
-        <StyledNavLink to="/stretch">ストレッチ一覧</StyledNavLink>
-        <StyledNavLink to="/profile">プロフィール</StyledNavLink>
-        <LogoutButton onClick={handleLogout}>ログアウト</LogoutButton>
+        {(user || isGuest) && (
+          <>
+            <StyledNavLink to="/dashboard">ダッシュボード</StyledNavLink>
+            <StyledNavLink to="/stretch">ストレッチ一覧</StyledNavLink>
+            <StyledNavLink to="/profile">プロフィール</StyledNavLink>
+          </>
+        )}
+        <AuthSection>
+          {renderAuthSection()}
+        </AuthSection>
       </Nav>
     </HeaderContainer>
   );

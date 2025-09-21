@@ -3,6 +3,8 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import styled from 'styled-components';
 import { useStretchStore } from './store/stretchStore';
 
+import useUserDataSync from './hooks/useUserDataSync';
+
 // Pages
 import HomePage from './pages/HomePage';
 import DashboardPage from './pages/DashboardPage';
@@ -24,6 +26,7 @@ const AppContainer = styled.div`
 `;
 
 function App() {
+  useUserDataSync();
   const initializeStretches = useStretchStore(state => state.initializeStretches);
 
   useEffect(() => {
