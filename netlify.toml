@@ -1,0 +1,15 @@
+# Netlify configuration file
+
+[build]
+  # This command will be run to build your site.
+  command = "npm run build"
+  # This is the directory where your built site will be located.
+  publish = "build"
+  # The directory where our serverless functions are located.
+  functions = "netlify/functions"
+
+# Redirect rule to proxy API requests to our serverless function.
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
