@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
-import { useUserStore } from '../store/userStore';
+import useUserStore from '../store/userStore';
 import useUiStore from '../store/uiStore';
 import useAuthStore from '../store/authStore';
 import { auth } from '../firebase';

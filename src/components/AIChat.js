@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import styled from 'styled-components';
 import { generateAIResponse } from '../utils/aiLogic';
-import { useUserStore } from '../store/userStore';
+import useUserStore from '../store/userStore';
 import { useStretchStore } from '../store/stretchStore';
 
 const ChatContainer = styled.div`

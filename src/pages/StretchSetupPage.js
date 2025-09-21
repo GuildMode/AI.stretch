@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import styled from 'styled-components';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useUserStore } from '../store/userStore';
+import useUserStore from '../store/userStore';
 import { useStretchStore } from '../store/stretchStore';
 
 // --- STYLED COMPONENTS ---

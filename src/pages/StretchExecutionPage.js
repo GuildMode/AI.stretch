@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { useUserStore } from '../store/userStore';
+import useUserStore from '../store/userStore';
 
 // --- Audio Placeholder Functions ---
 // NOTE: These are placeholders. You need to implement the actual audio playback.
