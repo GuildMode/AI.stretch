@@ -62,8 +62,7 @@ ${userInput}
 `;
     console.log("Step 3: Prompt constructed.");
 
-    const API_URL = 
-`https://generative-language.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${API_KEY}`;
+    const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${API_KEY}`;
 
     console.log("Step 4: Calling Gemini API...");
     const geminiResponse = await fetch(API_URL, {
@@ -77,9 +76,9 @@ ${userInput}
     console.log(`Step 4: Gemini API call completed with status: ${geminiResponse.status}`);
 
     if (!geminiResponse.ok) {
-      const errorBody = await geminiResponse.json();
-      console.error('Gemini API request failed:', errorBody);
-      return { statusCode: geminiResponse.status, body: JSON.stringify({ text: 'AIの応答生成に失敗しました。' }) };
+      const errorText = await geminiResponse.text();
+      console.error(`Gemini API request failed with status ${geminiResponse.status}:`, errorText);
+      return { statusCode: geminiResponse.status, body: JSON.stringify({ text: `AIの応答生成に失敗しました。ステータス: ${geminiResponse.status}` }) };
     }
 
     console.log("Step 5: Parsing Gemini response...");
