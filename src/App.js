@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import styled from 'styled-components';
 import { useStretchStore } from './store/stretchStore';
+import useAuthStore from './store/authStore';
 import { initializeFirebase } from './firebase';
 import useUserDataSync from './hooks/useUserDataSync';
 
@@ -34,18 +35,20 @@ const LoadingScreen = styled.div`
 `;
 
 function App() {
-  const [isFirebaseInitialized, setFirebaseInitialized] = useState(false);
+  const [isAppInitialized, setAppInitialized] = useState(false);
+  const listenToAuthChanges = useAuthStore(state => state.listenToAuthChanges);
 
-  // This effect runs once on app startup to initialize Firebase.
+  // This effect runs once on app startup to initialize services.
   useEffect(() => {
     initializeFirebase().then(success => {
       if (success) {
-        setFirebaseInitialized(true);
+        // After Firebase is ready, start listening for auth changes.
+        listenToAuthChanges();
+        setAppInitialized(true);
       }
       // If initialization fails, the app will be stuck on the loading screen.
-      // A more robust app would show an error message.
     });
-  }, []);
+  }, [listenToAuthChanges]);
 
   // This effect initializes the stretch data from the local data file.
   const initializeStretches = useStretchStore(state => state.initializeStretches);
@@ -54,12 +57,10 @@ function App() {
   }, [initializeStretches]);
 
   // This custom hook syncs user data with Firestore or localStorage.
-  // It will only run after Firebase is initialized, because the authStore
-  // isLoading state will prevent it from running immediately.
   useUserDataSync();
 
-  // Render a loading screen until Firebase is ready.
-  if (!isFirebaseInitialized) {
+  // Render a loading screen until services are ready.
+  if (!isAppInitialized) {
     return <LoadingScreen>アプリを初期化しています...</LoadingScreen>;
   }
 

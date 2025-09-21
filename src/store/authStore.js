@@ -2,41 +2,45 @@ import { create } from 'zustand';
 import { getFirebaseAuth } from '../firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 
+let authStateListener = null; // To hold the unsubscribe function
+
 const useAuthStore = create((set, get) => ({
-  user: null,       // Holds user data from Firebase, or null
-  isGuest: false,   // True if the user proceeds as a guest
-  isLoading: true,  // True while checking the initial auth state
+  user: null,
+  isGuest: false,
+  isLoading: true, // isLoading is true until the first auth state is confirmed
 
-  // Action to explicitly set guest mode
   setGuest: () => set({ isGuest: true, isLoading: false, user: null }),
-
-  // Action to clear guest mode (e.g., when going back to the home page)
   clearGuest: () => set({ isGuest: false }),
 
-  // Internal action to update the store based on Firebase auth state
-  _updateAuthSate: (user) => {
-    // If a user logs in, they are no longer a guest
+  _updateAuthState: (user) => {
     const isGuest = user ? false : get().isGuest;
     set({ user, isLoading: false, isGuest });
   },
-}));
 
-// This part is crucial. It listens to real-time auth changes from Firebase.
-// When the app first loads, this checks if the user is already signed in.
-onAuthStateChanged(getFirebaseAuth(), (user) => {
-  if (user) {
-    // User is signed in, update the store with a simplified user object
-    const simplifiedUser = {
-      uid: user.uid,
-      displayName: user.displayName,
-      email: user.email,
-      photoURL: user.photoURL,
-    };
-    useAuthStore.getState()._updateAuthSate(simplifiedUser);
-  } else {
-    // User is signed out or not logged in initially
-    useAuthStore.getState()._updateAuthSate(null);
-  }
-});
+  /**
+   * Starts listening for Firebase auth state changes.
+   * This should only be called once after Firebase is initialized.
+   */
+  listenToAuthChanges: () => {
+    // Unsubscribe from any previous listener
+    if (authStateListener) {
+      authStateListener();
+    }
+
+    authStateListener = onAuthStateChanged(getFirebaseAuth(), (user) => {
+      if (user) {
+        const simplifiedUser = {
+          uid: user.uid,
+          displayName: user.displayName,
+          email: user.email,
+          photoURL: user.photoURL,
+        };
+        get()._updateAuthState(simplifiedUser);
+      } else {
+        get()._updateAuthState(null);
+      }
+    });
+  },
+}));
 
 export default useAuthStore;
