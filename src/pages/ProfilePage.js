@@ -95,43 +95,6 @@ const HistoryTable = styled.table`
   }
 `;
 
-const ClickableTr = styled.tr`
-  cursor: pointer;
-  &:hover {
-    background-color: #fafafa;
-  }
-`;
-
-const DetailsTd = styled.td`
-  background-color: #fdfdfd;
-  padding: 20px 40px !important;
-`;
-
-const StretchListUl = styled.ul`
-  margin: 0;
-  padding-left: 20px;
-  list-style-type: square;
-  color: #555;
-  li {
-    margin-bottom: 8px;
-  }
-`;
-
-const RedoButton = styled.button`
-  background-color: #3498db;
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  transition: background-color 0.2s ease;
-
-  &:hover {
-    background-color: #2980b9;
-  }
-`;
-
 const NoHistory = styled.p`
   text-align: center;
   color: #888;
@@ -156,7 +119,20 @@ const ButtonGroup = styled.div`
   gap: 1rem;
 `;
 
-const SaveButton = styled(RedoButton)``;
+const SaveButton = styled.button`
+  background-color: #3498db;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: #2980b9;
+  }
+`;
 
 // --- MAIN COMPONENT ---
 const ProfilePage = () => {
@@ -173,7 +149,6 @@ const ProfilePage = () => {
   } = useUserStore();
 
   const [profileInput, setProfileInput] = useState(userProfile);
-  const [expandedId, setExpandedId] = useState(null);
 
   useEffect(() => {
     setProfileInput(userProfile);
@@ -182,8 +157,6 @@ const ProfilePage = () => {
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      // The onAuthStateChanged listener in authStore will handle state updates.
-      // We just need to navigate to the home page.
       navigate('/');
     } catch (error) {
       console.error("Error signing out: ", error);
@@ -194,7 +167,7 @@ const ProfilePage = () => {
     setUserProfile(profileInput);
     openModal({
       title: '成功',
-      message: 'AIがあなたのプロフィールを記憶しました。',
+      message: 'AIのプロフィールへの記憶が保存されました。',
       confirmText: 'OK',
     });
   };
@@ -217,14 +190,6 @@ const ProfilePage = () => {
       confirmText: '削除する',
       onConfirm: resetActivityHistory,
     });
-  };
-
-  const handleRedo = (activity) => {
-    // ... (omitted for brevity, no changes needed here)
-  };
-
-  const toggleDetails = (id) => {
-    setExpandedId(expandedId === id ? null : id);
   };
 
   return (
@@ -268,7 +233,22 @@ const ProfilePage = () => {
         </SectionHeader>
         {activityHistory.length > 0 ? (
           <HistoryTable>
-            {/* ... (omitted for brevity, no changes needed here) */}
+            <thead>
+              <tr>
+                <th>実施日時</th>
+                <th>合計時間</th>
+                <th>実施ストレッチ数</th>
+              </tr>
+            </thead>
+            <tbody>
+              {activityHistory.map(item => (
+                <tr key={item.id}>
+                  <td>{new Date(item.date).toLocaleString('ja-JP')}</td>
+                  <td>{`${Math.floor(item.totalDuration / 60)}分 ${item.totalDuration % 60}秒`}</td>
+                  <td>{item.playlist.length}</td>
+                </tr>
+              ))}
+            </tbody>
           </HistoryTable>
         ) : (
           <NoHistory>アクティビティ履歴はまだありません。</NoHistory>

@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import useAuthStore from '../store/authStore';
-import useUserStore, { initialUserState } from '../store/userStore';
+import useUserStore from '../store/userStore';
 import { getUserDocument, updateUserDocument } from '../services/firestoreService';
 import { useDebouncedCallback } from 'use-debounce';
 
