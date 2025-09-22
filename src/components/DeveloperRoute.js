@@ -11,10 +11,10 @@ const DeveloperRoute = () => {
   }
 
   // 開発者のメールアドレス
-  const developerEmail = 'Guild.mov@gmail.com';
+  const developerEmail = 'guild.mov@gmail.com';
 
   // ユーザーがログインしており、かつメールアドレスが一致する場合のみ子ルートを表示
-  return user && user.email.toLowerCase() === developerEmail ? <Outlet /> : <Navigate to="/dashboard" />;
+  return user && user.email.toLowerCase() === developerEmail ? <Outlet /> : <Navigate to="/home" />;
 };
 
 export default DeveloperRoute;

@@ -81,7 +81,7 @@ const HomePage = () => {
       await signInWithPopup(getFirebaseAuth(), googleProvider);
       // onAuthStateChanged in authStore will handle navigation and state updates
       // But we can navigate immediately for a better user experience.
-      navigate('/dashboard');
+      navigate('/home');
     } catch (error) {
       console.error("Error during Google login:", error);
       // Handle errors here, e.g., show a notification to the user
@@ -90,7 +90,7 @@ const HomePage = () => {
 
   const handleGuestLogin = () => {
     setGuest();
-    navigate('/dashboard');
+    navigate('/home');
   };
 
   return (

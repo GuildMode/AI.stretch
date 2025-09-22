@@ -83,7 +83,7 @@ function App() {
           <AppContainer>
             <Routes>
               <Route path="/" element={<HomePage />} />
-              <Route path="/dashboard" element={<DashboardPage />} />
+              <Route path="/home" element={<DashboardPage />} />
               <Route path="/stretch" element={<StretchListPage />} />
               <Route path="/stretch/setup" element={<StretchSetupPage />} />
               <Route path="/stretch/play" element={<StretchExecutionPage />} />

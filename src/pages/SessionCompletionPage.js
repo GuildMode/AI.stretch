@@ -56,7 +56,7 @@ const SessionCompletionPage = () => {
       <CompletionContainer>
         <Title>お疲れ様でした！</Title>
         <Message>セッションの記録が見つかりませんでした。</Message>
-        <HomeButton onClick={() => navigate('/dashboard')}>ホームに戻る</HomeButton>
+        <HomeButton onClick={() => navigate('/home')}>ホームに戻る</HomeButton>
       </CompletionContainer>
     );
   }
@@ -70,7 +70,7 @@ const SessionCompletionPage = () => {
       <Message>
         合計{totalMinutes}分のストレッチで、{uniqueParts}つの部位をほぐしました。
       </Message>
-      <HomeButton onClick={() => navigate('/dashboard')}>ホームに戻る</HomeButton>
+      <HomeButton onClick={() => navigate('/home')}>ホームに戻る</HomeButton>
     </CompletionContainer>
   );
 };

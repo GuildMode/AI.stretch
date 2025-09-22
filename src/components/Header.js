@@ -127,11 +127,11 @@ const Header = () => {
 
   return (
     <HeaderContainer>
-      <Logo to={user || isGuest ? '/dashboard' : '/'}>AI.stretch</Logo>
+      <Logo to={user || isGuest ? '/home' : '/'}>AI.stretch</Logo>
       <Nav>
         {(user || isGuest) && (
           <>
-            <StyledNavLink to="/dashboard">ホーム</StyledNavLink>
+            <StyledNavLink to="/home">ホーム</StyledNavLink>
             <StyledNavLink to="/stretch">ストレッチ</StyledNavLink>
             <StyledNavLink to="/history">履歴</StyledNavLink>
             <StyledNavLink to="/settings">設定</StyledNavLink>
