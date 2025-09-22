@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
+import * as Tone from 'tone';
 import styled from 'styled-components';
 import { useNavigate, useLocation } from 'react-router-dom';
 import useUserStore from '../store/userStore';
@@ -16,8 +17,6 @@ const FilterIcon = () => (
 // --- STYLED COMPONENTS ---
 const PageContainer = styled.div`
   padding: ${({ theme }) => theme.spacing.large} ${({ theme }) => theme.spacing.medium};
-  max-width: 1200px;
-  margin: 0 auto;
 `;
 
 const Title = styled.h1`
@@ -29,8 +28,12 @@ const Title = styled.h1`
 
 const MainLayout = styled.div`
   display: grid;
-  grid-template-columns: 1fr 350px;
+  grid-template-columns: 1fr; /* Single column for mobile */
   gap: ${({ theme }) => theme.spacing.large};
+
+  @media (min-width: 1024px) {
+    grid-template-columns: 1fr 350px; /* Two columns for desktop */
+  }
 `;
 
 const StretchListContainer = styled.div``;
@@ -124,13 +127,15 @@ const FilterCountBadge = styled.span`
 const FilterPanel = styled.div`
   position: absolute;
   top: 100%;
+  left: 0; /* Align with the button */
   margin-top: 8px;
   background: ${({ theme }) => theme.colors.surface};
   border-radius: ${({ theme }) => theme.borderRadius};
   box-shadow: ${({ theme }) => theme.boxShadow};
   padding: ${({ theme }) => theme.spacing.large};
   z-index: 10;
-  width: 500px;
+  width: 300px; /* A more reasonable default width */
+  max-width: 90vw; /* Use viewport width for mobile */
   display: flex;
   flex-direction: column;
   gap: ${({ theme }) => theme.spacing.medium};
@@ -173,11 +178,14 @@ const ConfigPanel = styled.div`
   border-radius: ${({ theme }) => theme.borderRadius};
   box-shadow: ${({ theme }) => theme.boxShadow};
   padding: 1.5rem;
-  position: sticky;
-  top: 2rem;
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+
+  @media (min-width: 1024px) {
+    position: sticky;
+    top: 2rem;
+  }
 `;
 
 const ConfigTitle = styled.h2`
@@ -334,7 +342,10 @@ const StretchSetupPage = () => {
     return total > 0 ? total : 0;
   }, [selectedIds, duration, rest]);
 
-  const handleStart = () => {
+  const handleStart = async () => {
+    if (Tone.context.state !== 'running') {
+      await Tone.start();
+    }
     setLastStretchSettings({ duration, rest });
     const playlist = stretches.filter(s => selectedIds.includes(s.id));
     navigate('/stretch/play', { state: { playlist, duration: Number(duration), rest: Number(rest) } });

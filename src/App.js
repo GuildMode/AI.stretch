@@ -29,9 +29,14 @@ import Header from './components/Header';
 import Modal from './components/Modal';
 
 const AppContainer = styled.div`
-  max-width: 1200px;
+  width: 100%;
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 0 20px; /* スマートフォンでの左右の余白を確保 */
+
+  /* 画面幅が768px以上の場合に適用 */
+  @media (min-width: 768px) {
+    max-width: 1200px;
+  }
 `;
 
 const LoadingScreen = styled.div`

@@ -11,11 +11,9 @@ export const generateAIResponse = async (userInput, stretches = [], userProfile 
   // Handle initial greeting without calling the backend
   if (!userInput) {
     return {
-        text: `こんにちは！AIパーソナルトレーナーです。
-あなたの体調や目標に合わせて最適なストレッチを提案します。
-まずは、マイページであなたのことを教えてください。
-もちろん、このまま「肩こりがひどい」や「リラックスしたい」のように話しかけてくれても大丈夫です！`,
+        text: `こんにちは！ AIパーソナルトレーナーです。\n身体に関するお悩みや、目標を教えてください。あなたに合ったストレッチを提案します。`,
         suggestions: null,
+        updatedProfile: userProfile, // 初期メッセージではプロフィールは変更しない
     }
   }
 

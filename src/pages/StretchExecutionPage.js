@@ -1,32 +1,91 @@
-
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+import * as Tone from 'tone';
 import useUserStore from '../store/userStore';
 
-// --- Audio Placeholder Functions ---
-// NOTE: These are placeholders. You need to implement the actual audio playback.
-// 1. Add your audio files (e.g., countdown.mp3, rest.mp3) to the `public/assets/` directory.
-// 2. Use the <audio> element with a ref to control playback.
+// --- Tone.js Synths ---
+const preSynth = new Tone.Synth({
+  oscillator: { type: 'sine' },
+  envelope: { attack: 0.005, decay: 0.1, sustain: 0.3, release: 1 },
+}).toDestination();
+preSynth.volume.value = -20;
 
-const playCountdownSound = () => {
-  console.log('PLAY: Countdown sound');
-};
+const switchSynth = new Tone.Synth({
+  oscillator: { type: 'sine' },
+  envelope: { attack: 0.005, decay: 0.1, sustain: 0.3, release: 1 },
+}).toDestination();
 
-const playRestEndSound = () => {
-  console.log('PLAY: Rest end sound');
-};
+// --- STYLED COMPONENTS (SHARED) ---
+const TimerSvg = styled.svg`
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+`;
+
+const TimerPath = styled.circle`
+  fill: none;
+  stroke-width: ${props => props.strokeWidth || 12};
+  stroke-linecap: round;
+`;
+
+const TimerBackground = styled(TimerPath)`
+  stroke: #e0e0e0;
+`;
+
+const TimerProgress = styled(TimerPath)`
+  stroke: ${props => (props.isResting ? props.theme.colors.accent : props.theme.colors.primary)};
+  transition: stroke-dashoffset 1s linear, stroke 0.5s;
+`;
+
+const ControlButton = styled.button`
+  padding: 0.8rem 2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border: 1px solid transparent;
+  border-radius: ${props => props.theme.borderRadius};
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &.primary {
+    background-color: ${props => props.theme.colors.primary};
+    border-color: ${props => props.theme.colors.primary};
+    color: white;
+    &:hover { opacity: 0.9; }
+  }
+
+  &.secondary {
+    background-color: ${props => props.theme.colors.surface};
+    color: ${props => props.theme.colors.textSecondary};
+    border-color: ${props => props.theme.colors.border};
+    &:hover { background-color: ${props => props.theme.colors.background}; }
+  }
+  
+  &.skip {
+    background-color: ${props => props.theme.colors.accent};
+    border-color: ${props => props.theme.colors.accent};
+    color: ${props => props.theme.colors.text};
+    &:hover { opacity: 0.9; }
+  }
+`;
 
 
-// --- STYLED COMPONENTS ---
-const PageContainer = styled.div`
+// --- DESKTOP-ONLY STYLED COMPONENTS ---
+const DesktopPageContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  min-height: calc(100vh - 70px); // Header height
+  justify-content: flex-start;
+  min-height: calc(100vh - 70px);
   padding: 2rem;
   background-color: ${props => props.theme.colors.lightGray};
+
+  @media (max-width: 767px) {
+    display: none;
+  }
 `;
 
 const TimerCircle = styled.div`
@@ -41,34 +100,8 @@ const TimerCircle = styled.div`
   justify-content: center;
   position: relative;
   margin-bottom: 2rem;
+  flex-shrink: 0;
 `;
-
-const TimerSvg = styled.svg`
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  transform: rotate(-90deg);
-`;
-
-const TimerPath = styled.circle`
-  fill: none;
-  stroke-width: 12;
-  stroke-linecap: round;
-`;
-
-const TimerBackground = styled(TimerPath)`
-  stroke: #e0e0e0;
-`;
-
-const TimerProgress = styled(TimerPath)`
-  stroke: ${props => (props.isResting ? props.theme.colors.accent : props.theme.colors.primary)};
-  stroke-dasharray: 628; // 2 * PI * 100
-  stroke-dashoffset: ${props => 628 * (1 - props.progress)};
-  transition: stroke-dashoffset 1s linear, stroke 0.5s;
-`;
-
 
 const TimeDisplay = styled.div`
   font-size: 5rem;
@@ -83,7 +116,8 @@ const StatusLabel = styled.div`
   color: ${props => props.theme.colors.text};
   margin-bottom: 1rem;
   z-index: 1;
-  height: 2.2rem; // Add height to prevent layout shift
+  height: 2.2rem;
+  text-align: center;
 `;
 
 const StretchInfo = styled.div`
@@ -150,37 +184,83 @@ const Controls = styled.div`
   margin-top: 2rem;
 `;
 
-const ControlButton = styled.button`
-  padding: 0.8rem 2rem;
-  font-size: 1rem;
-  font-weight: 600;
-  border: 1px solid transparent;
-  border-radius: ${props => props.theme.borderRadius};
-  cursor: pointer;
-  transition: all 0.2s ease;
 
-  &.primary {
-    background-color: ${props => props.theme.colors.primary};
-    border-color: ${props => props.theme.colors.primary};
-    color: white;
-    &:hover { opacity: 0.9; }
-  }
+// --- MOBILE-ONLY STYLED COMPONENTS ---
+const MobilePageContainer = styled.div`
+  display: none;
+  background-color: ${props => props.theme.colors.lightGray};
 
-  &.secondary {
-    background-color: ${props => props.theme.colors.surface};
-    color: ${props => props.theme.colors.textSecondary};
-    border-color: ${props => props.theme.colors.border};
-    &:hover { background-color: ${props => props.theme.colors.background}; }
-  }
-  
-  &.skip {
-    background-color: ${props => props.theme.colors.accent};
-    border-color: ${props => props.theme.colors.accent};
-    color: ${props => props.theme.colors.text};
-    &:hover { opacity: 0.9; }
+  @media (max-width: 767px) {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 70px); // Full height minus header
   }
 `;
 
+const MobileHeader = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 1rem;
+  background: ${({ theme }) => theme.colors.surface};
+  border-bottom: 1px solid ${({ theme }) => theme.colors.border};
+  flex-shrink: 0;
+`;
+
+const MobileTimerInfo = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  overflow: hidden; // To contain the ellipsed text
+`;
+
+const MobileCompactTimer = styled.div`
+  width: 50px;
+  height: 50px;
+  position: relative;
+  flex-shrink: 0;
+  
+  .time-display {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: ${({ theme }) => theme.colors.primary};
+  }
+`;
+
+const MobileStretchName = styled.h1`
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: ${({ theme }) => theme.colors.text};
+  margin: 0;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+`;
+
+const MobileContent = styled.div`
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: 1.5rem;
+`;
+
+const MobileControls = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  padding: 1rem;
+  background: ${({ theme }) => theme.colors.surface};
+  border-top: 1px solid ${({ theme }) => theme.colors.border};
+  flex-shrink: 0;
+
+  ${ControlButton}.primary {
+    grid-column: 1 / -1; // Make pause/resume button full width
+  }
+`;
 
 // --- MAIN COMPONENT ---
 const StretchExecutionPage = () => {
@@ -192,19 +272,17 @@ const StretchExecutionPage = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isResting, setIsResting] = useState(false);
   const [timeLeft, setTimeLeft] = useState(duration);
-  const [isPaused, setIsPaused] = useState(false);
+  const [isPaused, setIsPaused] = useState(false); // Start timer immediately
 
   const intervalRef = useRef(null);
 
   const finishSession = useCallback(() => {
-    // Calculate the actual duration based on completed stretches and rests
     let actualDuration = 0;
     if (currentIndex > 0) {
-      actualDuration += currentIndex * duration; // Add completed stretches duration
-      actualDuration += (isResting ? currentIndex : currentIndex - 1) * rest; // Add completed rests duration
+      actualDuration += currentIndex * duration;
+      actualDuration += (isResting ? currentIndex : currentIndex - 1) * rest;
     }
-    // Add time spent in the current segment
-    const timeInCurrentSegment = (isResting ? duration : duration) - timeLeft;
+    const timeInCurrentSegment = (isResting ? rest : duration) - timeLeft;
     if (!isResting) actualDuration += timeInCurrentSegment;
 
     const activity = {
@@ -213,15 +291,15 @@ const StretchExecutionPage = () => {
       playlist,
       duration,
       rest,
-      totalDuration: actualDuration, // Use the actual calculated duration
+      totalDuration: actualDuration,
     };
     addActivity(activity);
     navigate('/stretch/complete', { state: { totalDuration: actualDuration, playlist } });
   }, [playlist, duration, rest, addActivity, navigate, currentIndex, isResting, timeLeft]);
 
   const handleNext = useCallback(() => {
-    if (isResting) { // Rest is over, start next stretch
-      playRestEndSound();
+    switchSynth.triggerAttackRelease('G4', '8n');
+    if (isResting) {
       if (currentIndex + 1 < playlist.length) {
         setCurrentIndex(prev => prev + 1);
         setIsResting(false);
@@ -229,12 +307,11 @@ const StretchExecutionPage = () => {
       } else {
         finishSession();
       }
-    } else { // Stretch is over, start rest or finish
+    } else {
       if (currentIndex + 1 < playlist.length) {
         setIsResting(true);
         setTimeLeft(rest);
-      }
-      else {
+      } else {
         finishSession();
       }
     }
@@ -259,73 +336,135 @@ const StretchExecutionPage = () => {
   }, [isPaused, playlist, navigate]);
 
   useEffect(() => {
+    if (isPaused) return;
+
     if (!isResting && timeLeft > 0 && timeLeft <= 3) {
-      playCountdownSound();
+      preSynth.triggerAttackRelease('C4', '32n');
     }
 
     if (timeLeft === 0) {
       handleNext();
     }
-  }, [timeLeft, isResting, handleNext]);
+  }, [timeLeft, isResting, handleNext, isPaused]);
 
   if (!playlist || playlist.length === 0) {
-    return null; // or a loading/redirecting message
+    return null;
   }
 
   const currentStretch = playlist[currentIndex];
   const nextStretch = playlist[currentIndex + 1];
-  const totalDuration = isResting ? rest : duration;
-  const progress = timeLeft / totalDuration;
+  const totalTimerDuration = isResting ? rest : duration;
+  const progress = timeLeft / totalTimerDuration;
 
   const infoStretch = isResting ? nextStretch : currentStretch;
 
+  const renderTimerProgress = (radius, strokeWidth) => {
+    const circumference = 2 * Math.PI * radius;
+    const svgSize = radius * 2 + strokeWidth * 2;
+    return (
+      <TimerSvg viewBox={`0 0 ${svgSize} ${svgSize}`}>
+        <TimerBackground cx={radius + strokeWidth} cy={radius + strokeWidth} r={radius} strokeWidth={strokeWidth} />
+        <TimerProgress
+          cx={radius + strokeWidth}
+          cy={radius + strokeWidth}
+          r={radius}
+          isResting={isResting}
+          strokeWidth={strokeWidth}
+          style={{
+            strokeDasharray: circumference,
+            strokeDashoffset: circumference * (1 - progress),
+          }}
+        />
+      </TimerSvg>
+    );
+  };
+
   return (
-    <PageContainer>
-      <StatusLabel>
-        {isResting ? `休憩中 (次は: ${nextStretch?.name})` : 'ストレッチ中'}
-      </StatusLabel>
-      
-      <TimerCircle>
-        <TimerSvg viewBox="0 0 220 220">
-          <TimerBackground cx="110" cy="110" r="100" />
-          <TimerProgress
-            cx="110"
-            cy="110"
-            r="100"
-            isResting={isResting}
-            progress={progress}
-          />
-        </TimerSvg>
-        <TimeDisplay>{timeLeft}</TimeDisplay>
-      </TimerCircle>
+    <>
+      {/* --- DESKTOP LAYOUT --- */}
+      <DesktopPageContainer>
+        <StatusLabel>
+          {isResting ? `休憩中 (次は: ${nextStretch?.name})` : 'ストレッチ中'}
+        </StatusLabel>
+        
+        <TimerCircle>
+          {renderTimerProgress(100, 12)}
+          <TimeDisplay>{timeLeft}</TimeDisplay>
+        </TimerCircle>
 
-      <StretchInfo>
-        <StretchName>{infoStretch.name}</StretchName>
-        <SectionTitle>手順</SectionTitle>
-        <InstructionList>
-          {infoStretch.description.map((step, index) => (
-            <InstructionStep key={index}>{step}</InstructionStep>
-          ))}
-        </InstructionList>
+        {infoStretch && <StretchInfo>
+          <StretchName>{infoStretch.name}</StretchName>
+          <SectionTitle>手順</SectionTitle>
+          <InstructionList>
+            {infoStretch.description.map((step, index) => (
+              <InstructionStep key={index}>{step}</InstructionStep>
+            ))}
+          </InstructionList>
 
-        <SectionTitle>ポイント</SectionTitle>
-        <PointList>
-          {infoStretch.points.map((point, index) => (
-            <li key={index}>{point}</li>
-          ))}
-        </PointList>
-      </StretchInfo>
+          <SectionTitle>ポイント</SectionTitle>
+          <PointList>
+            {infoStretch.points.map((point, index) => (
+              <li key={index}>{point}</li>
+            ))}
+          </PointList>
+        </StretchInfo>}
 
-      <Controls>
-        <ControlButton className="primary" onClick={() => setIsPaused(!isPaused)}>
-          {isPaused ? '再開' : '一時停止'}
-        </ControlButton>
-        <ControlButton className="skip" onClick={handleNext}>スキップ</ControlButton>
-        <ControlButton className="secondary" onClick={finishSession}>
-          終了
-        </ControlButton>
-      </Controls>
-    </PageContainer>
+        <Controls>
+          <ControlButton className="primary" onClick={() => setIsPaused(!isPaused)}>
+            {isPaused ? '再開' : '一時停止'}
+          </ControlButton>
+          <ControlButton className="skip" onClick={handleNext}>スキップ</ControlButton>
+          <ControlButton className="secondary" onClick={finishSession}>
+            終了
+          </ControlButton>
+        </Controls>
+      </DesktopPageContainer>
+
+      {/* --- MOBILE LAYOUT --- */}
+      <MobilePageContainer>
+        <MobileHeader>
+          <MobileTimerInfo>
+            <MobileCompactTimer>
+              {renderTimerProgress(20, 8)}
+              <div className="time-display">{timeLeft}</div>
+            </MobileCompactTimer>
+            {infoStretch && <MobileStretchName>
+              {isResting ? `休憩中 (次は: ${nextStretch?.name})` : infoStretch.name}
+            </MobileStretchName>}
+          </MobileTimerInfo>
+        </MobileHeader>
+
+        <MobileContent>
+          {infoStretch && (
+            <>
+              <SectionTitle>手順</SectionTitle>
+              <InstructionList>
+                {infoStretch.description.map((step, index) => (
+                  <InstructionStep key={index}>{step}</InstructionStep>
+                ))}
+              </InstructionList>
+
+              <SectionTitle>ポイント</SectionTitle>
+              <PointList>
+                {infoStretch.points.map((point, index) => (
+                  <li key={index}>{point}</li>
+                ))}
+              </PointList>
+            </>
+          )}
+        </MobileContent>
+
+        <MobileControls>
+           <ControlButton className="primary" onClick={() => setIsPaused(!isPaused)}>
+            {isPaused ? '再開' : '一時停止'}
+          </ControlButton>
+          <ControlButton className="skip" onClick={handleNext}>スキップ</ControlButton>
+          <ControlButton className="secondary" onClick={finishSession}>
+            終了
+          </ControlButton>
+        </MobileControls>
+      </MobilePageContainer>
+    </>
   );
 };
 

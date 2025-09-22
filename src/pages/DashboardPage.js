@@ -43,6 +43,22 @@ const ExecuteButton = styled.button`
   &:disabled { background-color: #bdc3c7; cursor: not-allowed; }
 `;
 
+const NewChatButton = styled.button`
+  padding: 10px 20px;
+  font-size: ${({ theme }) => theme.fontSizes.body};
+  font-weight: 600;
+  color: ${({ theme }) => theme.colors.textSecondary};
+  background-color: ${({ theme }) => theme.colors.surface};
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  border-radius: ${({ theme }) => theme.borderRadius};
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+
+  &:hover {
+    background-color: ${({ theme }) => theme.colors.background};
+  }
+`;
+
 const CardGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -92,9 +108,14 @@ const Tag = styled.span`
   margin-bottom: 6px;
 `;
 
+const EquipmentTag = styled(Tag)`
+  background-color: ${({ theme }) => theme.colors.accent}30;
+  color: ${({ theme }) => theme.colors.accent};
+`;
+
 const DashboardPage = () => {
   const navigate = useNavigate();
-  const { aiSuggestions, savedRoutines } = useUserStore();
+  const { aiSuggestions, savedRoutines, resetChat } = useUserStore();
   const stretches = useStretchStore((state) => state.stretches);
 
   const suggestedStretches = React.useMemo(() => {
@@ -123,11 +144,14 @@ const DashboardPage = () => {
 
       <SectionHeader>
         <SectionTitle>AIから提案されたストレッチ</SectionTitle>
-        {suggestedStretches.length > 0 && (
-            <ExecuteButton onClick={handleExecuteAISuggestions}>
-              すべて実行
-            </ExecuteButton>
-        )}
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+          <NewChatButton onClick={resetChat}>新しいチャット</NewChatButton>
+          {suggestedStretches.length > 0 && (
+              <ExecuteButton onClick={handleExecuteAISuggestions}>
+                すべて実行
+              </ExecuteButton>
+          )}
+        </div>
       </SectionHeader>
       {suggestedStretches.length > 0 ? (
         <CardGrid>
@@ -136,6 +160,9 @@ const DashboardPage = () => {
               <CardTitle>{stretch.name}</CardTitle>
               <TagsContainer>
                 {stretch.targetArea.map(area => <Tag key={area}>{area}</Tag>)}
+                {stretch.equipment && stretch.equipment !== 'なし' && (
+                  <EquipmentTag>&#x1F6E0; {stretch.equipment}</EquipmentTag>
+                )}
               </TagsContainer>
             </Card>
           ))}

@@ -4,12 +4,14 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 export const initialUserState = {
   userProfile: '',
   activityHistory: [],
-  savedRoutines: [], // <--- New state for saved routines
+  savedRoutines: [],
   lastStretchSettings: {
     duration: 30,
     rest: 10,
   },
   showTagsInSetup: true,
+  chatMessages: [], // To store chat history
+  aiSuggestions: [], // To store AI suggestions
 };
 
 const useUserStore = create(
@@ -17,7 +19,6 @@ const useUserStore = create(
     (set) => ({
       ...initialUserState,
       isLoaded: false, 
-      aiSuggestions: [],
 
       setUserData: (data) => set({ ...data, isLoaded: true }),
       setUserProfile: (profile) => set({ userProfile: profile }),
@@ -25,12 +26,17 @@ const useUserStore = create(
         activityHistory: [newActivity, ...state.activityHistory],
       })),
       setLastStretchSettings: (settings) => set({ lastStretchSettings: settings }),
+      
+      // --- Chat related actions ---
       setAiSuggestions: (suggestions) => set({ aiSuggestions: suggestions }),
+      addChatMessage: (message) => set(state => ({ chatMessages: [...state.chatMessages, message] })),
+      setChatMessages: (messages) => set({ chatMessages: messages }),
+      resetChat: () => set({ chatMessages: [], aiSuggestions: [] }),
+
+      // --- Other actions ---
       resetActivityHistory: () => set({ activityHistory: [] }),
       resetUserProfile: () => set({ userProfile: '' }),
       toggleShowTagsInSetup: () => set(state => ({ showTagsInSetup: !state.showTagsInSetup })),
-
-      // --- Actions for saved routines ---
       addRoutine: (routine) => set(state => ({ savedRoutines: [...state.savedRoutines, routine] })),
       deleteRoutine: (routineId) => set(state => ({ 
         savedRoutines: state.savedRoutines.filter(r => r.id !== routineId) 
@@ -46,7 +52,9 @@ const useUserStore = create(
         activityHistory: state.activityHistory,
         lastStretchSettings: state.lastStretchSettings,
         showTagsInSetup: state.showTagsInSetup,
-        savedRoutines: state.savedRoutines, // <--- Persist saved routines
+        savedRoutines: state.savedRoutines,
+        chatMessages: state.chatMessages, // Persist chat messages
+        aiSuggestions: state.aiSuggestions, // Persist AI suggestions
       }),
       onRehydrateStorage: (state) => {
         state.isLoaded = true;

@@ -17,21 +17,31 @@ const FilterIcon = () => (
 // --- Styles ---
 const StretchListContainer = styled.div`
   padding: ${({ theme }) => theme.spacing.large} ${({ theme }) => theme.spacing.medium};
-  max-width: 1200px;
-  margin: 0 auto;
 `;
 
 const HeaderContainer = styled.div`
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column; /* Stack vertically on mobile */
+  gap: ${({ theme }) => theme.spacing.medium};
+  align-items: stretch; /* Stretch items to fill width */
   margin-bottom: ${({ theme }) => theme.spacing.large};
+
+  @media (min-width: 768px) {
+    flex-direction: row; /* Back to horizontal on desktop */
+    justify-content: space-between;
+    align-items: center;
+  }
 `;
 
 const Title = styled.h1`
   color: ${({ theme }) => theme.colors.text};
   font-size: ${({ theme }) => theme.fontSizes.h1};
   margin: 0;
+  text-align: center; /* Center title on mobile */
+
+  @media (min-width: 768px) {
+    text-align: left; /* Align left on desktop */
+  }
 `;
 
 const SetupButton = styled.button`
@@ -44,9 +54,14 @@ const SetupButton = styled.button`
   border-radius: ${({ theme }) => theme.borderRadius};
   cursor: pointer;
   transition: background-color 0.2s ease-in-out;
+  width: 100%; /* Full width on mobile */
 
   &:hover {
     opacity: 0.9;
+  }
+
+  @media (min-width: 768px) {
+    width: auto; /* Auto width on desktop */
   }
 `;
 
@@ -96,14 +111,17 @@ const FilterPanel = styled.div`
   box-shadow: ${({ theme }) => theme.boxShadow};
   padding: ${({ theme }) => theme.spacing.large};
   z-index: 10;
-  width: 500px;
+  width: 90vw; /* Use viewport width for mobile */
+  max-width: 500px; /* Keep max-width for larger screens */
+  left: 50%;
+  /* Center the panel and handle animation */
+  transform: ${props => (props.isOpen ? 'translateX(-50%) translateY(0)' : 'translateX(-50%) translateY(-10px)')};
+  visibility: ${props => (props.isOpen ? 'visible' : 'hidden')};
+  opacity: ${props => (props.isOpen ? 1 : 0)};
+  transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
   display: flex;
   flex-direction: column;
   gap: ${({ theme }) => theme.spacing.medium};
-  opacity: ${props => (props.isOpen ? 1 : 0)};
-  transform: ${props => (props.isOpen ? 'translateY(0)' : 'translateY(-10px)')};
-  visibility: ${props => (props.isOpen ? 'visible' : 'hidden')};
-  transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
 `;
 
 const CheckboxGroup = styled.div`

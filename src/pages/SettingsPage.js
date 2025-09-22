@@ -10,8 +10,6 @@ import { signOut } from 'firebase/auth';
 // --- STYLED COMPONENTS ---
 const PageContainer = styled.div`
   padding: ${({ theme }) => theme.spacing.large} ${({ theme }) => theme.spacing.medium};
-  max-width: 900px;
-  margin: 0 auto;
   animation: fadeIn 0.5s ease-in-out;
 
   @keyframes fadeIn {
@@ -39,6 +37,8 @@ const SectionHeader = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap; /* Allow items to wrap */
+  gap: ${({ theme }) => theme.spacing.medium}; /* Add gap for wrapped items */
   border-bottom: 1px solid ${({ theme }) => theme.colors.border};
   padding-bottom: ${({ theme }) => theme.spacing.medium};
   margin-bottom: ${({ theme }) => theme.spacing.medium};
@@ -102,8 +102,25 @@ const ProfileTextArea = styled.textarea`
 
 const ButtonGroup = styled.div`
   display: flex;
-  justify-content: flex-end;
+  flex-direction: column; /* Stack buttons vertically on mobile */
   gap: 1rem;
+
+  & > button {
+    width: 100%;
+    padding: 12px; /* Add more padding for easier tapping */
+    font-size: 1rem;
+  }
+
+  @media (min-width: 768px) {
+    flex-direction: row; /* Horizontal layout on desktop */
+    justify-content: flex-end;
+
+    & > button {
+      width: auto;
+      padding: 8px 16px;
+      font-size: 0.9rem;
+    }
+  }
 `;
 
 const SaveButton = styled.button`
@@ -240,7 +257,7 @@ const SettingsPage = () => {
     setUserProfile(profileInput);
     openModal({
       title: '成功',
-      message: 'AIのプロフィールへの記憶が保存されました。',
+      message: 'AIパーソナルトレーナーの記憶が保存されました。',
       confirmText: 'OK',
     });
   };
@@ -248,7 +265,7 @@ const SettingsPage = () => {
   const handleResetProfile = () => {
     openModal({
       title: '記憶をリセット',
-      message: 'AIに記憶させたプロフィール情報をすべて削除します。よろしいですか？',
+      message: 'AIパーソナルトレーナーに記憶させた情報をすべてリセットします。\nよろしいですか？',
       confirmText: 'リセットする',
       onConfirm: () => {
         resetUserProfile();
@@ -304,16 +321,16 @@ const SettingsPage = () => {
 
       <Section>
         <SectionHeader>
-          <SectionTitle>AIトレーナーの記憶</SectionTitle>
+          <SectionTitle>AIパーソナルトレーナーの記憶</SectionTitle>
         </SectionHeader>
         <p style={{ marginTop: 0, color: '#666' }}>
-          AIにあなたのことを教えることで、よりパーソナライズされた提案を受けられるようになります。<br/>
-          （例：30代男性、デスクワーク中心。運動不足で腰痛持ち。目標は疲労回復。）
+          AIにあなたのことを教えると、よりパーソナライズされた提案を受けられるようになります。<br/>
+          （例：30代男性、デスクワーク中心。運動不足で腰痛持ち。）
         </p>
         <ProfileTextArea
           value={profileInput}
           onChange={(e) => setProfileInput(e.target.value)}
-          placeholder="あなたの体の特徴、目標、悩みなどを自由に入力してください..."
+          placeholder="あなたの身体の特徴、目標、悩みなどを自由に入力してください..."
         />
         <ButtonGroup>
           <ActionButton onClick={handleResetProfile}>記憶をリセット</ActionButton>

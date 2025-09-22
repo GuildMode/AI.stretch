@@ -84,44 +84,60 @@ const SendButton = styled.button`
 `;
 
 const AIChat = () => {
-  const [messages, setMessages] = useState([]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messageListRef = useRef(null);
 
-  const userProfile = useUserStore((state) => state.userProfile);
-  const setAiSuggestions = useUserStore((state) => state.setAiSuggestions);
+  const {
+    userProfile,
+    setUserProfile,
+    setAiSuggestions,
+    chatMessages,
+    addChatMessage,
+    setChatMessages,
+  } = useUserStore();
+  
   const stretches = useStretchStore(state => state.stretches);
 
-  // Set initial greeting message on mount
+  // Set initial greeting message on mount if chat is empty
   useEffect(() => {
     const fetchInitialMessage = async () => {
-      const initialResponse = await generateAIResponse('');
-      setMessages([{ id: 1, sender: 'ai', ...initialResponse }]);
+      if (chatMessages.length === 0) {
+        setIsLoading(true);
+        const initialResponse = await generateAIResponse('');
+        addChatMessage({ id: 1, sender: 'ai', ...initialResponse });
+        setIsLoading(false);
+      }
     };
     fetchInitialMessage();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     if (messageListRef.current) {
       messageListRef.current.scrollTop = messageListRef.current.scrollHeight;
     }
-  }, [messages, isLoading]);
+  }, [chatMessages, isLoading]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!inputValue.trim() || isLoading) return;
 
     const userMessage = { id: Date.now(), sender: 'user', text: inputValue };
-    const updatedMessages = [...messages, userMessage];
-    setMessages(updatedMessages);
+    addChatMessage(userMessage);
     setInputValue('');
     setIsLoading(true);
 
     try {
-      const aiResponse = await generateAIResponse(inputValue, stretches, userProfile, updatedMessages);
-      const aiMessage = { id: Date.now() + 1, sender: 'ai', ...aiResponse };
-      setMessages(prev => [...prev, aiMessage]);
+      const aiResponse = await generateAIResponse(inputValue, stretches, userProfile, chatMessages);
+      const aiMessage = { id: Date.now() + 1, sender: 'ai', text: aiResponse.text, suggestions: aiResponse.suggestions };
+      addChatMessage(aiMessage);
+
+      // Auto-update user profile if changed
+      if (aiResponse.updatedProfile && aiResponse.updatedProfile !== userProfile) {
+        setUserProfile(aiResponse.updatedProfile);
+        console.log('User profile was auto-updated.');
+      }
 
       if (aiResponse.suggestions && aiResponse.suggestions.length > 0) {
         setAiSuggestions(aiResponse.suggestions);
@@ -129,7 +145,7 @@ const AIChat = () => {
     } catch (error) {
       console.error("Error in handleSubmit:", error);
       const errorMessage = { id: Date.now() + 1, sender: 'ai', text: 'エラーが発生しました。もう一度お試しください。', suggestions: null };
-      setMessages(prev => [...prev, errorMessage]);
+      addChatMessage(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -139,7 +155,7 @@ const AIChat = () => {
     <ChatContainer>
       <Title>AIパーソナルトレーナー</Title>
       <MessageList ref={messageListRef}>
-        {messages.map((msg) => (
+        {chatMessages.map((msg) => (
           <Message key={msg.id} sender={msg.sender}>
             <MessageBubble sender={msg.sender}>{msg.text}</MessageBubble>
           </Message>
