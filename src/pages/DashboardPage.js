@@ -6,69 +6,64 @@ import AIChat from '../components/AIChat';
 import useUserStore from '../store/userStore';
 import { useStretchStore } from '../store/stretchStore';
 
-
 const DashboardContainer = styled.div`
-  padding: 2rem 0;
+  padding: ${({ theme }) => theme.spacing.large} ${({ theme }) => theme.spacing.medium};
+  max-width: 1200px;
+  margin: 0 auto;
 `;
 
 const Title = styled.h1`
-  font-size: 2.2rem;
-  color: #333;
-  margin-bottom: 1rem;
+  color: ${({ theme }) => theme.colors.text};
+  font-size: ${({ theme }) => theme.fontSizes.h1};
+  margin-bottom: ${({ theme }) => theme.spacing.large};
 `;
 
 const SectionHeader = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 2.5rem;
-  margin-bottom: 1.5rem;
-  border-bottom: 2px solid #3498db;
-  padding-bottom: 0.5rem;
+  margin-top: ${({ theme }) => theme.spacing.xlarge};
+  margin-bottom: ${({ theme }) => theme.spacing.medium};
+  border-bottom: 2px solid ${({ theme }) => theme.colors.border};
+  padding-bottom: ${({ theme }) => theme.spacing.small};
 `;
 
 const SectionTitle = styled.h2`
-  font-size: 1.5rem;
-  color: #444;
+  font-size: ${({ theme }) => theme.fontSizes.h2};
+  color: ${({ theme }) => theme.colors.text};
   margin: 0;
 `;
 
-const ExecuteAllButton = styled.button`
+const ExecuteButton = styled.button`
   padding: 10px 20px;
-  font-size: 0.9rem;
+  font-size: ${({ theme }) => theme.fontSizes.body};
   font-weight: 600;
-  color: #fff;
-  background-color: #2ecc71;
+  color: ${({ theme }) => theme.colors.white};
+  background-color: ${({ theme }) => theme.colors.primary};
   border: none;
-  border-radius: 8px;
+  border-radius: ${({ theme }) => theme.borderRadius};
   cursor: pointer;
   transition: background-color 0.2s ease-in-out;
 
-  &:hover {
-    background-color: #27ae60;
-  }
-
-  &:disabled {
-    background-color: #bdc3c7;
-    cursor: not-allowed;
-  }
+  &:hover { opacity: 0.9; }
+  &:disabled { background-color: #bdc3c7; cursor: not-allowed; }
 `;
 
-// --- Stretch Card Styles (from StretchPage) ---
-const StretchGrid = styled.div`
+const CardGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 24px;
+  gap: ${({ theme }) => theme.spacing.large};
 `;
 
-const StretchCard = styled(Link)`
-  background-color: #fff;
-  border: 1px solid #e0e0e0;
-  border-radius: 12px;
-  padding: 24px;
+const Card = styled(Link)`
+  background: ${({ theme }) => theme.colors.surface};
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  border-radius: ${({ theme }) => theme.borderRadius};
+  box-shadow: ${({ theme }) => theme.boxShadow};
+  padding: ${({ theme }) => theme.spacing.medium};
   text-decoration: none;
-  color: #333;
-  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  color: ${({ theme }) => theme.colors.text};
+  transition: all 0.2s ease-in-out;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -76,12 +71,14 @@ const StretchCard = styled(Link)`
 
   &:hover {
     transform: translateY(-5px);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    border-color: ${({ theme }) => theme.colors.secondary};
   }
 `;
 
-const StretchName = styled.h3`
-  font-size: 1.25rem;
+const CardTitle = styled.h3`
+  font-size: ${({ theme }) => theme.fontSizes.large};
+  color: ${({ theme }) => theme.colors.text};
   margin: 0 0 1rem 0;
 `;
 
@@ -91,61 +88,86 @@ const TagsContainer = styled.div`
 
 const Tag = styled.span`
   display: inline-block;
-  background-color: #e0e7ff;
-  color: #4f46e5;
-  padding: 4px 10px;
+  background-color: ${({ theme }) => theme.colors.primary}15;
+  color: ${({ theme }) => theme.colors.primary};
+  padding: 4px 12px;
   border-radius: 9999px;
-  font-size: 0.8rem;
-  font-weight: 500;
+  font-size: ${({ theme }) => theme.fontSizes.small};
+  font-weight: 600;
   margin-right: 6px;
   margin-bottom: 6px;
 `;
-// --- End of Stretch Card Styles ---
 
 const DashboardPage = () => {
   const navigate = useNavigate();
-  const aiSuggestions = useUserStore((state) => state.aiSuggestions);
+  const { aiSuggestions, savedRoutines } = useUserStore();
   const stretches = useStretchStore((state) => state.stretches);
 
   const suggestedStretches = React.useMemo(() => {
-    if (!aiSuggestions || aiSuggestions.length === 0) {
-      return [];
-    }
-    // Map IDs from suggestions to full stretch objects
+    if (!aiSuggestions || aiSuggestions.length === 0) return [];
     return aiSuggestions.map(id => stretches.find(s => s.id === id)).filter(Boolean);
   }, [aiSuggestions, stretches]);
 
-  const handleExecuteAll = () => {
+  const handleExecuteAISuggestions = () => {
     navigate('/stretch/setup', { state: { preselectedIds: aiSuggestions } });
+  };
+
+  const handleExecuteRoutine = (routine) => {
+    navigate('/stretch/setup', {
+      state: {
+        preselectedIds: routine.stretchIds,
+        duration: routine.duration,
+        rest: routine.rest,
+      },
+    });
   };
 
   return (
     <DashboardContainer>
-      <Title>マイダッシュボード</Title>
       
       <AIChat />
 
       <SectionHeader>
         <SectionTitle>AIから提案されたストレッチ</SectionTitle>
         {suggestedStretches.length > 0 && (
-            <ExecuteAllButton onClick={handleExecuteAll}>
+            <ExecuteButton onClick={handleExecuteAISuggestions}>
               すべて実行
-            </ExecuteAllButton>
+            </ExecuteButton>
         )}
       </SectionHeader>
       {suggestedStretches.length > 0 ? (
-        <StretchGrid>
+        <CardGrid>
           {suggestedStretches.map(stretch => (
-            <StretchCard key={stretch.id} to={`/stretch/${stretch.id}`}>
-              <StretchName>{stretch.name}</StretchName>
+            <Card key={stretch.id} to={`/stretch/${stretch.id}`}>
+              <CardTitle>{stretch.name}</CardTitle>
               <TagsContainer>
                 {stretch.targetArea.map(area => <Tag key={area}>{area}</Tag>)}
               </TagsContainer>
-            </StretchCard>
+            </Card>
           ))}
-        </StretchGrid>
+        </CardGrid>
       ) : (
         <p>AIトレーナーに話しかけて、あなたに合ったストレッチを提案してもらいましょう。</p>
+      )}
+
+      {savedRoutines.length > 0 && (
+        <>
+          <SectionHeader>
+            <SectionTitle>保存したメニュー</SectionTitle>
+          </SectionHeader>
+          <CardGrid>
+            {savedRoutines.map(routine => (
+              <Card as="div" key={routine.id} style={{cursor: 'default'}}>
+                <CardTitle>{routine.name}</CardTitle>
+                <div style={{ marginTop: 'auto' }}>
+                  <ExecuteButton onClick={() => handleExecuteRoutine(routine)} style={{width: '100%'}}>
+                    実行する
+                  </ExecuteButton>
+                </div>
+              </Card>
+            ))}
+          </CardGrid>
+        </>
       )}
     </DashboardContainer>
   );

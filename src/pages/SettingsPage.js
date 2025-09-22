@@ -9,7 +9,7 @@ import { signOut } from 'firebase/auth';
 
 // --- STYLED COMPONENTS ---
 const PageContainer = styled.div`
-  padding: 40px 0;
+  padding: ${({ theme }) => theme.spacing.large} ${({ theme }) => theme.spacing.medium};
   max-width: 900px;
   margin: 0 auto;
   animation: fadeIn 0.5s ease-in-out;
@@ -20,26 +20,33 @@ const PageContainer = styled.div`
   }
 `;
 
+const Title = styled.h1`
+  font-size: ${({ theme }) => theme.fontSizes.h1};
+  color: ${({ theme }) => theme.colors.text};
+  margin-bottom: ${({ theme }) => theme.spacing.large};
+`;
+
 const Section = styled.div`
-  background: #fff;
-  border: 1px solid #eee;
-  border-radius: 12px;
-  padding: 30px;
-  margin-bottom: 30px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  background: ${({ theme }) => theme.colors.surface};
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  border-radius: ${({ theme }) => theme.borderRadius};
+  padding: ${({ theme }) => theme.spacing.large};
+  margin-bottom: ${({ theme }) => theme.spacing.large};
+  box-shadow: ${({ theme }) => theme.boxShadow};
 `;
 
 const SectionHeader = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid #f0f0f0;
-  padding-bottom: 15px;
-  margin-bottom: 25px;
+  border-bottom: 1px solid ${({ theme }) => theme.colors.border};
+  padding-bottom: ${({ theme }) => theme.spacing.medium};
+  margin-bottom: ${({ theme }) => theme.spacing.medium};
 `;
 
 const SectionTitle = styled.h2`
-  font-size: 1.5rem;
+  font-size: ${({ theme }) => theme.fontSizes.h2};
+  color: ${({ theme }) => theme.colors.text};
   margin: 0;
 `;
 
@@ -48,7 +55,7 @@ const ActionButton = styled.button`
   background-color: #e74c3c;
   color: #fff;
   padding: 8px 16px;
-  border-radius: 5px;
+  border-radius: ${({ theme }) => theme.borderRadius};
   text-decoration: none;
   border: none;
   cursor: pointer;
@@ -63,7 +70,7 @@ const ActionButton = styled.button`
 const UserInfo = styled.div`
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: ${({ theme }) => theme.spacing.medium};
 `;
 
 const UserAvatar = styled.img`
@@ -73,44 +80,24 @@ const UserAvatar = styled.img`
 `;
 
 const UserName = styled.h3`
-  font-size: 1.2rem;
+  font-size: ${({ theme }) => theme.fontSizes.h3};
+  color: ${({ theme }) => theme.colors.text};
   font-weight: 600;
   margin: 0;
-`;
-
-const HistoryTable = styled.table`
-  width: 100%;
-  border-collapse: collapse;
-  text-align: left;
-
-  th, td {
-    padding: 15px;
-    border-bottom: 1px solid #f0f0f0;
-    vertical-align: middle;
-  }
-
-  th {
-    background-color: #f9f9f9;
-    font-weight: 700;
-  }
-`;
-
-const NoHistory = styled.p`
-  text-align: center;
-  color: #888;
-  padding: 2rem;
 `;
 
 const ProfileTextArea = styled.textarea`
   width: 100%;
   min-height: 120px;
-  padding: 15px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
+  padding: ${({ theme }) => theme.spacing.medium};
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  border-radius: ${({ theme }) => theme.borderRadius};
   font-size: 1rem;
   line-height: 1.6;
   resize: vertical;
-  margin-bottom: 15px;
+  margin-bottom: ${({ theme }) => theme.spacing.medium};
+  background-color: ${({ theme }) => theme.colors.background};
+  color: ${({ theme }) => theme.colors.text};
 `;
 
 const ButtonGroup = styled.div`
@@ -120,29 +107,72 @@ const ButtonGroup = styled.div`
 `;
 
 const SaveButton = styled.button`
-  background-color: #3498db;
+  background-color: ${({ theme }) => theme.colors.primary};
   color: white;
   border: none;
   padding: 8px 16px;
-  border-radius: 5px;
+  border-radius: ${({ theme }) => theme.borderRadius};
   cursor: pointer;
   font-size: 0.9rem;
   transition: background-color 0.2s ease;
 
   &:hover {
-    background-color: #2980b9;
+    opacity: 0.9;
   }
 `;
 
+// --- Theme Toggle Switch ---
+const ThemeSwitchLabel = styled.label`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+`;
+
+const ThemeSwitch = styled.div`
+  position: relative;
+  width: 50px;
+  height: 26px;
+  background: ${({ theme }) => theme.colors.border};
+  border-radius: 34px;
+  transition: background-color 0.2s;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 4px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: white;
+    transition: transform 0.2s;
+  }
+`;
+
+const ThemeSwitchInput = styled.input`
+  opacity: 0;
+  width: 0;
+  height: 0;
+
+  &:checked + ${ThemeSwitch} {
+    background: ${({ theme }) => theme.colors.primary};
+  }
+
+  &:checked + ${ThemeSwitch}::before {
+    transform: translateX(24px);
+  }
+`;
+
+
 // --- MAIN COMPONENT ---
-const ProfilePage = () => {
+const SettingsPage = () => {
   const navigate = useNavigate();
-  const openModal = useUiStore(state => state.openModal);
+  const { openModal } = useUiStore();
+  const { themeMode, toggleThemeMode } = useUiStore();
   const { user, isGuest } = useAuthStore();
   
   const { 
-    activityHistory, 
-    resetActivityHistory, 
     userProfile, 
     setUserProfile, 
     resetUserProfile 
@@ -183,26 +213,30 @@ const ProfilePage = () => {
     });
   };
 
-  const handleResetHistory = () => {
-    openModal({
-      title: 'アクティビティ履歴をリセット',
-      message: 'すべてのアクティビティ履歴を削除します。この操作は元に戻せません。',
-      confirmText: '削除する',
-      onConfirm: resetActivityHistory,
-    });
-  };
-
   return (
     <PageContainer>
+      <Title>設定</Title>
+
       <Section>
         <SectionHeader>
-          <SectionTitle>アカウント情報</SectionTitle>
+          <SectionTitle>ユーザー情報</SectionTitle>
           {user && <ActionButton onClick={handleLogout}>ログアウト</ActionButton>}
         </SectionHeader>
         <UserInfo>
           {user && <UserAvatar src={user.photoURL} alt="User avatar" />}
           <UserName>{user ? user.displayName : (isGuest ? 'ゲストユーザー' : '未ログイン')}</UserName>
         </UserInfo>
+      </Section>
+
+      <Section>
+        <SectionHeader>
+          <SectionTitle>テーマ切り替え</SectionTitle>
+        </SectionHeader>
+        <ThemeSwitchLabel>
+          <span>{themeMode === 'light' ? 'ライトテーマ' : 'ダークテーマ'}</span>
+          <ThemeSwitchInput type="checkbox" checked={themeMode === 'dark'} onChange={toggleThemeMode} />
+          <ThemeSwitch />
+        </ThemeSwitchLabel>
       </Section>
 
       <Section>
@@ -224,39 +258,8 @@ const ProfilePage = () => {
         </ButtonGroup>
       </Section>
 
-      <Section>
-        <SectionHeader>
-          <SectionTitle>アクティビティ履歴</SectionTitle>
-          {activityHistory.length > 0 && (
-            <ActionButton onClick={handleResetHistory}>履歴をリセット</ActionButton>
-          )}
-        </SectionHeader>
-        {activityHistory.length > 0 ? (
-          <HistoryTable>
-            <thead>
-              <tr>
-                <th>実施日時</th>
-                <th>合計時間</th>
-                <th>実施ストレッチ数</th>
-              </tr>
-            </thead>
-            <tbody>
-              {activityHistory.map(item => (
-                <tr key={item.id}>
-                  <td>{new Date(item.date).toLocaleString('ja-JP')}</td>
-                  <td>{`${Math.floor(item.totalDuration / 60)}分 ${item.totalDuration % 60}秒`}</td>
-                  <td>{item.playlist.length}</td>
-                </tr>
-              ))}
-            </tbody>
-          </HistoryTable>
-        ) : (
-          <NoHistory>アクティビティ履歴はまだありません。</NoHistory>
-        )}
-      </Section>
-
     </PageContainer>
   );
 };
 
-export default ProfilePage;
+export default SettingsPage;

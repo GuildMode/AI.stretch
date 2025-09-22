@@ -24,17 +24,17 @@ const PageContainer = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: calc(100vh - 80px); // Assuming header height is 80px
+  min-height: calc(100vh - 70px); // Header height
   padding: 2rem;
-  background-color: #f4f7f6;
+  background-color: ${props => props.theme.colors.lightGray};
 `;
 
 const TimerCircle = styled.div`
   width: 300px;
   height: 300px;
   border-radius: 50%;
-  background-color: #fff;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+  background-color: ${props => props.theme.colors.white};
+  box-shadow: ${props => props.theme.boxShadow};
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -59,11 +59,11 @@ const TimerPath = styled.circle`
 `;
 
 const TimerBackground = styled(TimerPath)`
-  stroke: #e6e6e6;
+  stroke: #e0e0e0;
 `;
 
 const TimerProgress = styled(TimerPath)`
-  stroke: ${props => (props.isResting ? '#f39c12' : '#3498db')};
+  stroke: ${props => (props.isResting ? props.theme.colors.accent : props.theme.colors.primary)};
   stroke-dasharray: 628; // 2 * PI * 100
   stroke-dashoffset: ${props => 628 * (1 - props.progress)};
   transition: stroke-dashoffset 1s linear, stroke 0.5s;
@@ -73,14 +73,14 @@ const TimerProgress = styled(TimerPath)`
 const TimeDisplay = styled.div`
   font-size: 5rem;
   font-weight: 700;
-  color: #333;
+  color: ${props => props.theme.colors.primary};
   z-index: 1;
 `;
 
 const StatusLabel = styled.div`
   font-size: 1.5rem;
   font-weight: 500;
-  color: #555;
+  color: ${props => props.theme.colors.text};
   margin-bottom: 1rem;
   z-index: 1;
   height: 2.2rem; // Add height to prevent layout shift
@@ -91,24 +91,33 @@ const StretchInfo = styled.div`
   max-width: 600px;
   width: 100%;
   z-index: 1;
-  background: #fff;
+  background: ${props => props.theme.colors.white};
   padding: 2rem;
-  border-radius: 12px;
-  box-shadow: 0 8px 16px rgba(0,0,0,0.05);
+  border-radius: ${props => props.theme.borderRadius};
+  box-shadow: ${props => props.theme.boxShadow};
 `;
 
 const StretchName = styled.h1`
   font-size: 2rem;
-  color: #333;
+  color: ${props => props.theme.colors.primary};
   margin: 0 0 1.5rem 0;
   text-align: center;
+`;
+
+const SectionTitle = styled.h2`
+  font-size: 1.2rem;
+  color: ${props => props.theme.colors.primary};
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 0.5rem;
 `;
 
 const InstructionList = styled.ol`
   padding-left: 20px;
   margin: 0;
   font-size: 1.1rem;
-  color: #666;
+  color: ${props => props.theme.colors.text};
   line-height: 1.7;
 `;
 
@@ -116,7 +125,22 @@ const InstructionStep = styled.li`
   margin-bottom: 1rem;
   &::marker {
     font-weight: 700;
-    color: #3498db;
+    color: ${props => props.theme.colors.primary};
+  }
+`;
+
+const PointList = styled.ul`
+  padding-left: 20px;
+  margin: 0;
+  font-size: 1.1rem;
+  color: ${props => props.theme.colors.text};
+  line-height: 1.7;
+
+  li {
+    margin-bottom: 0.8rem;
+    &::marker {
+      color: ${props => props.theme.colors.secondary};
+    }
   }
 `;
 
@@ -130,27 +154,30 @@ const ControlButton = styled.button`
   padding: 0.8rem 2rem;
   font-size: 1rem;
   font-weight: 600;
-  border: none;
-  border-radius: 8px;
+  border: 1px solid transparent;
+  border-radius: ${props => props.theme.borderRadius};
   cursor: pointer;
   transition: all 0.2s ease;
 
   &.primary {
-    background-color: #3498db;
+    background-color: ${props => props.theme.colors.primary};
+    border-color: ${props => props.theme.colors.primary};
     color: white;
-    &:hover { background-color: #2980b9; }
+    &:hover { opacity: 0.9; }
   }
 
   &.secondary {
-    background-color: #e0e0e0;
-    color: #333;
-    &:hover { background-color: #bdbdbd; }
+    background-color: ${props => props.theme.colors.surface};
+    color: ${props => props.theme.colors.textSecondary};
+    border-color: ${props => props.theme.colors.border};
+    &:hover { background-color: ${props => props.theme.colors.background}; }
   }
   
   &.skip {
-    background-color: #95a5a6;
-    color: white;
-    &:hover { background-color: #7f8c8d; }
+    background-color: ${props => props.theme.colors.accent};
+    border-color: ${props => props.theme.colors.accent};
+    color: ${props => props.theme.colors.text};
+    &:hover { opacity: 0.9; }
   }
 `;
 
@@ -265,11 +292,19 @@ const StretchExecutionPage = () => {
 
       <StretchInfo>
         <StretchName>{infoStretch.name}</StretchName>
+        <SectionTitle>手順</SectionTitle>
         <InstructionList>
           {infoStretch.description.map((step, index) => (
             <InstructionStep key={index}>{step}</InstructionStep>
           ))}
         </InstructionList>
+
+        <SectionTitle>ポイント</SectionTitle>
+        <PointList>
+          {infoStretch.points.map((point, index) => (
+            <li key={index}>{point}</li>
+          ))}
+        </PointList>
       </StretchInfo>
 
       <Controls>

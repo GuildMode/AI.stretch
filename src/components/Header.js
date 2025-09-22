@@ -4,42 +4,45 @@ import styled from 'styled-components';
 import useAuthStore from '../store/authStore';
 
 const HeaderContainer = styled.header`
-  padding: 20px 40px;
-  background-color: #fff;
-  border-bottom: 1px solid #f0f0f0;
+  background-color: ${({ theme }) => theme.colors.surface};
+  border-bottom: 1px solid ${({ theme }) => theme.colors.border};
+  padding: 0 ${({ theme }) => theme.spacing.large};
+  height: 70px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  height: 80px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 `;
 
 const Logo = styled(NavLink)`
-  font-size: 24px;
+  font-size: 1.5rem;
   font-weight: 700;
-  color: #333;
+  color: ${({ theme }) => theme.colors.text};
   text-decoration: none;
 `;
 
 const Nav = styled.nav`
   display: flex;
-  gap: 30px;
+  gap: ${({ theme }) => theme.spacing.large};
   align-items: center;
 `;
 
 const StyledNavLink = styled(NavLink)`
   text-decoration: none;
-  color: #555;
-  font-size: 16px;
+  color: ${({ theme }) => theme.colors.textSecondary};
+  font-size: ${({ theme }) => theme.fontSizes.body};
   font-weight: 500;
   position: relative;
+  padding: 5px 0;
   transition: color 0.2s ease-in-out;
 
   &:hover {
-    color: #000;
+    color: ${({ theme }) => theme.colors.primary};
   }
 
   &.active {
-    color: #3498db;
+    color: ${({ theme }) => theme.colors.primary};
+    font-weight: 600;
     &::after {
       content: '';
       position: absolute;
@@ -47,7 +50,7 @@ const StyledNavLink = styled(NavLink)`
       left: 0;
       right: 0;
       height: 2px;
-      background-color: #3498db;
+      background-color: ${({ theme }) => theme.colors.primary};
     }
   }
 `;
@@ -80,18 +83,15 @@ const UserAvatar = styled.img`
 `;
 
 const LoginButton = styled.button`
-  background-color: #3498db;
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
-  transition: background-color 0.2s ease-in-out;
+  background-color: ${({ theme }) => theme.colors.primary};
+  color: ${({ theme }) => theme.colors.white};
+  padding: ${({ theme }) => theme.spacing.small} ${({ theme }) => theme.spacing.medium};
+  border-radius: ${({ theme }) => theme.borderRadius};
+  font-size: ${({ theme }) => theme.fontSizes.small};
+  font-weight: 600;
 
   &:hover {
-    background-color: #2980b9;
+    background-color: ${({ theme }) => theme.colors.secondary};
   }
 `;
 
@@ -111,7 +111,7 @@ const Header = () => {
 
     if (user) {
       return (
-        <UserProfileLink to="/profile">
+        <UserProfileLink to="/settings">
           <UserAvatar src={user.photoURL} alt={user.displayName} />
           <span>{user.displayName}</span>
         </UserProfileLink>
@@ -131,9 +131,10 @@ const Header = () => {
       <Nav>
         {(user || isGuest) && (
           <>
-            <StyledNavLink to="/dashboard">ダッシュボード</StyledNavLink>
-            <StyledNavLink to="/stretch">ストレッチ一覧</StyledNavLink>
-            <StyledNavLink to="/profile">プロフィール</StyledNavLink>
+            <StyledNavLink to="/dashboard">ホーム</StyledNavLink>
+            <StyledNavLink to="/stretch">ストレッチ</StyledNavLink>
+            <StyledNavLink to="/history">履歴</StyledNavLink>
+            <StyledNavLink to="/settings">設定</StyledNavLink>
           </>
         )}
         <AuthSection>

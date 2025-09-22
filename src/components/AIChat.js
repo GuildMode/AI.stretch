@@ -5,25 +5,25 @@ import useUserStore from '../store/userStore';
 import { useStretchStore } from '../store/stretchStore';
 
 const ChatContainer = styled.div`
-  background-color: #f9f9f9;
-  border: 1px solid #e0e0e0;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  padding: 20px;
-  margin-top: 2rem;
+  background: ${({ theme }) => theme.colors.surface};
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  border-radius: ${({ theme }) => theme.borderRadius};
+  box-shadow: ${({ theme }) => theme.boxShadow};
+  padding: ${({ theme }) => theme.spacing.large};
+  margin-top: ${({ theme }) => theme.spacing.xlarge};
 `;
 
 const Title = styled.h2`
-  font-size: 1.5rem;
-  color: #333;
+  font-size: ${({ theme }) => theme.fontSizes.h2};
+  color: ${({ theme }) => theme.colors.text};
   margin-top: 0;
-  margin-bottom: 1.5rem;
+  margin-bottom: ${({ theme }) => theme.spacing.medium};
 `;
 
 const MessageList = styled.div`
   height: 300px;
   overflow-y: auto;
-  margin-bottom: 1rem;
+  margin-bottom: ${({ theme }) => theme.spacing.medium};
   padding-right: 10px; /* for scrollbar */
 `;
 
@@ -38,9 +38,8 @@ const MessageBubble = styled.div`
   max-width: 80%;
   padding: 12px 18px;
   border-radius: 20px;
-  background-color: ${props => (props.sender === 'user' ? '#3498db' : '#fff')};
-  color: ${props => (props.sender === 'user' ? '#fff' : '#333')};
-  border: ${props => (props.sender === 'user' ? 'none' : '1px solid #e0e0e0')};
+  background-color: ${props => (props.sender === 'user' ? props.theme.colors.primary : props.theme.colors.background)};
+  color: ${props => (props.sender === 'user' ? props.theme.colors.white : props.theme.colors.text)};
   white-space: pre-wrap; /* 改行を反映させる */
 `;
 
@@ -52,10 +51,15 @@ const InputForm = styled.form`
 const TextInput = styled.input`
   flex-grow: 1;
   padding: 12px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  border-radius: ${({ theme }) => theme.borderRadius};
   font-size: 1rem;
-  background-color: ${props => props.disabled ? '#f2f2f2' : '#fff'};
+  background-color: ${({ theme }) => theme.colors.surface};
+  color: ${({ theme }) => theme.colors.text};
+
+  &:disabled {
+    background-color: ${({ theme }) => theme.colors.border};
+  }
 `;
 
 const SendButton = styled.button`
@@ -63,18 +67,18 @@ const SendButton = styled.button`
   font-size: 1rem;
   font-weight: bold;
   color: #fff;
-  background-color: #3498db;
+  background-color: ${({ theme }) => theme.colors.primary};
   border: none;
-  border-radius: 8px;
+  border-radius: ${({ theme }) => theme.borderRadius};
   cursor: pointer;
   transition: background-color 0.3s;
 
   &:hover {
-    background-color: #2980b9;
+    opacity: 0.9;
   }
 
   &:disabled {
-    background-color: #a9d6f5;
+    opacity: 0.5;
     cursor: not-allowed;
   }
 `;

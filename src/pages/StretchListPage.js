@@ -1,7 +1,9 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import styled from 'styled-components';
-import { Link, useNavigate } from 'react-router-dom';
-
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faStar as fasStar } from '@fortawesome/free-solid-svg-icons';
+import { faStar as farStar } from '@fortawesome/free-regular-svg-icons';
 
 import { useStretchStore } from '../store/stretchStore';
 
@@ -14,7 +16,7 @@ const FilterIcon = () => (
 
 // --- Styles ---
 const StretchListContainer = styled.div`
-  padding: 2rem 0;
+  padding: ${({ theme }) => theme.spacing.large} ${({ theme }) => theme.spacing.medium};
   max-width: 1200px;
   margin: 0 auto;
 `;
@@ -23,34 +25,35 @@ const HeaderContainer = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem;
+  margin-bottom: ${({ theme }) => theme.spacing.large};
 `;
 
 const Title = styled.h1`
-  font-size: 2.2rem;
-  color: #333;
+  color: ${({ theme }) => theme.colors.text};
+  font-size: ${({ theme }) => theme.fontSizes.h1};
+  margin: 0;
 `;
 
 const SetupButton = styled.button`
   padding: 12px 24px;
-  font-size: 1rem;
+  font-size: ${({ theme }) => theme.fontSizes.body};
   font-weight: 600;
-  color: #fff;
-  background-color: #3498db;
+  color: ${({ theme }) => theme.colors.white};
+  background-color: ${({ theme }) => theme.colors.primary};
   border: none;
-  border-radius: 8px;
+  border-radius: ${({ theme }) => theme.borderRadius};
   cursor: pointer;
   transition: background-color 0.2s ease-in-out;
 
   &:hover {
-    background-color: #2980b9;
+    opacity: 0.9;
   }
 `;
 
 const FilterControls = styled.div`
   display: flex;
   justify-content: center;
-  margin-bottom: 2.5rem;
+  margin-bottom: ${({ theme }) => theme.spacing.xlarge};
   position: relative;
 `;
 
@@ -60,20 +63,20 @@ const FilterButton = styled.button`
   gap: 8px;
   padding: 10px 20px;
   font-size: 1rem;
-  background-color: #fff;
-  border: 1px solid #ccc;
-  border-radius: 8px;
+  background-color: ${({ theme }) => theme.colors.surface};
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  border-radius: ${({ theme }) => theme.borderRadius};
   cursor: pointer;
-  color: #333; /* アイコンとテキストの色を明示的に指定 */
+  color: ${({ theme }) => theme.colors.text};
   transition: background-color 0.2s ease-in-out;
 
   &:hover {
-    background-color: #f9f9f9;
+    background-color: ${({ theme }) => theme.colors.background};
   }
 `;
 
 const FilterCountBadge = styled.span`
-  background-color: #3498db;
+  background-color: ${({ theme }) => theme.colors.primary};
   color: white;
   border-radius: 50%;
   width: 22px;
@@ -88,16 +91,15 @@ const FilterPanel = styled.div`
   position: absolute;
   top: 100%;
   margin-top: 8px;
-  background: #fff;
-  border: 1px solid #e0e0e0;
-  border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-  padding: 24px;
+  background: ${({ theme }) => theme.colors.surface};
+  border-radius: ${({ theme }) => theme.borderRadius};
+  box-shadow: ${({ theme }) => theme.boxShadow};
+  padding: ${({ theme }) => theme.spacing.large};
   z-index: 10;
   width: 500px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: ${({ theme }) => theme.spacing.medium};
   opacity: ${props => (props.isOpen ? 1 : 0)};
   transform: ${props => (props.isOpen ? 'translateY(0)' : 'translateY(-10px)')};
   visibility: ${props => (props.isOpen ? 'visible' : 'hidden')};
@@ -106,9 +108,9 @@ const FilterPanel = styled.div`
 
 const CheckboxGroup = styled.div`
   h3 {
-    font-size: 1.1rem;
+    font-size: ${({ theme }) => theme.fontSizes.large};
     margin: 0 0 12px 0;
-    color: #333;
+    color: ${({ theme }) => theme.colors.text};
   }
 `;
 
@@ -123,12 +125,12 @@ const CheckboxLabel = styled.label`
   align-items: center;
   gap: 8px;
   padding: 8px 12px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  border-radius: ${({ theme }) => theme.borderRadius};
   cursor: pointer;
   transition: background-color 0.2s, border-color 0.2s;
-  background-color: ${props => (props.checked ? '#e0e7ff' : '#fff')};
-  border-color: ${props => (props.checked ? '#4f46e5' : '#ddd')};
+  background-color: ${props => (props.checked ? `${props.theme.colors.primary}15` : props.theme.colors.surface)};
+  border-color: ${props => (props.checked ? props.theme.colors.primary : props.theme.colors.border)};
 
   input {
     display: none;
@@ -138,31 +140,48 @@ const CheckboxLabel = styled.label`
 const StretchGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 24px;
+  gap: ${({ theme }) => theme.spacing.large};
 `;
 
 const StretchCard = styled(Link)`
-  background-color: #fff;
-  border: 1px solid #e0e0e0;
-  border-radius: 12px;
-  padding: 24px;
+  background: ${({ theme }) => theme.colors.surface};
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  border-radius: ${({ theme }) => theme.borderRadius};
+  box-shadow: ${({ theme }) => theme.boxShadow};
+  padding: ${({ theme }) => theme.spacing.medium};
   text-decoration: none;
-  color: #333;
+  color: ${({ theme }) => theme.colors.text};
   transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   min-height: 150px;
+  position: relative;
 
   &:hover {
     transform: translateY(-5px);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    border-color: ${({ theme }) => theme.colors.secondary};
   }
 `;
 
+const FavoriteButton = styled.button`
+  position: absolute;
+  top: 0.8rem;
+  right: 0.8rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.2rem;
+  color: ${({ theme }) => theme.colors.accent};
+  z-index: 2;
+`;
+
 const StretchName = styled.h3`
-  font-size: 1.25rem;
+  font-size: ${({ theme }) => theme.fontSizes.large};
+  color: ${({ theme }) => theme.colors.text};
   margin: 0 0 1rem 0;
+  padding-right: 2rem; // space for favorite button
 `;
 
 const TagsContainer = styled.div`
@@ -174,12 +193,12 @@ const TagsContainer = styled.div`
 
 const Tag = styled.span`
   display: inline-block;
-  background-color: ${props => (props.type === 'equipment' ? '#d4edda' : '#e0e7ff')};
-  color: ${props => (props.type === 'equipment' ? '#155724' : '#4f46e5')};
+  background-color: ${props => (props.type === 'equipment' ? `${props.theme.colors.accent}30` : `${props.theme.colors.primary}15`)};
+  color: ${props => (props.type === 'equipment' ? props.theme.colors.accent : props.theme.colors.primary)};
   padding: 4px 10px;
   border-radius: 9999px;
   font-size: 0.8rem;
-  font-weight: 500;
+  font-weight: 600;
 `;
 
 const NoResults = styled.div`
@@ -197,33 +216,42 @@ const StretchListPage = () => {
   });
   const filterPanelRef = useRef(null);
   const navigate = useNavigate();
-  const stretches = useStretchStore(state => state.stretches);
+  const location = useLocation();
+  const { stretches, toggleFavorite } = useStretchStore();
 
-  // フィルターの選択肢をデータから動的に生成
+  useEffect(() => {
+    if (location.state?.initialFilter) {
+      setFilters(prev => ({
+        ...prev,
+        targetArea: [location.state.initialFilter]
+      }));
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location, navigate]);
+
   const targetAreaOptions = useMemo(() => [...new Set(stretches.flatMap(s => s.targetArea))], [stretches]);
   const equipmentOptions = useMemo(() => [...new Set(stretches.map(s => s.equipment).filter(Boolean))], [stretches]);
 
-  // チェックボックス変更ハンドラ
   const handleCheckboxChange = (category, value) => {
     setFilters(prev => {
       const currentValues = prev[category];
       const newValues = currentValues.includes(value)
-        ? currentValues.filter(v => v !== value) // 既に存在すれば削除
-        : [...currentValues, value]; // 存在しなければ追加
+        ? currentValues.filter(v => v !== value)
+        : [...currentValues, value];
       return { ...prev, [category]: newValues };
     });
   };
 
-  // フィルタリングされたストレッチリスト
-  const filteredStretches = useMemo(() => {
-    return stretches.filter(stretch => {
-      const targetAreaMatch = filters.targetArea.length === 0 || stretch.targetArea.some(area => filters.targetArea.includes(area));
-      const equipmentMatch = filters.equipment.length === 0 || filters.equipment.includes(stretch.equipment);
-      return targetAreaMatch && equipmentMatch;
-    });
+  const sortedAndFilteredStretches = useMemo(() => {
+    return stretches
+      .filter(stretch => {
+        const targetAreaMatch = filters.targetArea.length === 0 || stretch.targetArea.some(area => filters.targetArea.includes(area));
+        const equipmentMatch = filters.equipment.length === 0 || filters.equipment.includes(stretch.equipment);
+        return targetAreaMatch && equipmentMatch;
+      })
+      .sort((a, b) => (b.isFavorite ? 1 : 0) - (a.isFavorite ? 1 : 0));
   }, [filters, stretches]);
 
-  // パネルの外側をクリックしたら閉じる
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (filterPanelRef.current && !filterPanelRef.current.contains(event.target)) {
@@ -234,12 +262,18 @@ const StretchListPage = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  const handleFavoriteClick = (e, stretchId) => {
+    e.preventDefault(); // Prevent navigation
+    e.stopPropagation(); // Prevent card click event
+    toggleFavorite(stretchId);
+  };
+
   const totalFilterCount = filters.targetArea.length + filters.equipment.length;
 
   return (
     <StretchListContainer>
       <HeaderContainer>
-        <Title>ストレッチ一覧</Title>
+        <Title>ストレッチ</Title>
         <SetupButton onClick={() => navigate('/stretch/setup')}>
           カスタムストレッチを開始
         </SetupButton>
@@ -287,13 +321,16 @@ const StretchListPage = () => {
         </FilterPanel>
       </FilterControls>
 
-      {filteredStretches.length > 0 ? (
+      {sortedAndFilteredStretches.length > 0 ? (
         <StretchGrid>
-          {filteredStretches.map((stretch) => (
+          {sortedAndFilteredStretches.map((stretch) => (
             <StretchCard key={stretch.id} to={`/stretch/${stretch.id}`}>
+              <FavoriteButton onClick={(e) => handleFavoriteClick(e, stretch.id)}>
+                <FontAwesomeIcon icon={stretch.isFavorite ? fasStar : farStar} />
+              </FavoriteButton>
               <StretchName>{stretch.name}</StretchName>
               <TagsContainer>
-                {stretch.targetArea.map(area => <Tag key={area}>{area}</Tag>)}
+                {stretch.targetArea.map(area => <Tag key={area}>{area}</Tag>)} 
                 {stretch.equipment && stretch.equipment !== 'なし' && (
                   <Tag type="equipment">&#x1F6E0; {stretch.equipment}</Tag>
                 )}
@@ -309,5 +346,4 @@ const StretchListPage = () => {
     </StretchListContainer>
   );
 };
-
 export default StretchListPage;

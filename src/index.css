@@ -6,10 +6,6 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  
-  /* Design Concept: Monochrome Palette */
-  background-color: #FFFFFF; /* Base color: White */
-  color: #333333; /* Main text color: Dark Gray */
 }
 
 /* Minimalistic scrollbar */

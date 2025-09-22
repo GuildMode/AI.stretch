@@ -21,43 +21,42 @@ const HomeContainer = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: calc(100vh - 150px); /* Adjust height considering header */
+  height: calc(100vh - 70px); // Header height
   text-align: center;
+  padding: 0 ${({ theme }) => theme.spacing.medium};
   animation: ${fadeIn} 0.8s ease-out;
+  background-color: ${({ theme }) => theme.colors.background};
 `;
 
 const Title = styled.h1`
-  font-size: 4rem;
-  font-weight: 700;
-  margin-bottom: 1rem;
-  color: #222;
+  font-size: ${({ theme }) => theme.fontSizes.h1};
+  color: ${({ theme }) => theme.colors.text};
+  margin-bottom: ${({ theme }) => theme.spacing.medium};
 `;
 
 const Subtitle = styled.p`
-  font-size: 1.5rem;
-  color: #666;
-  margin-bottom: 2.5rem;
+  font-size: ${({ theme }) => theme.fontSizes.large};
+  color: ${({ theme }) => theme.colors.textSecondary};
+  margin-bottom: ${({ theme }) => theme.spacing.large};
   max-width: 600px;
 `;
 
 const ButtonContainer = styled.div`
   display: flex;
-  gap: 1rem;
+  gap: ${({ theme }) => theme.spacing.medium};
 `;
 
 const CTAButton = styled.button`
-  border: none;
-  padding: 15px 35px;
-  font-size: 1.1rem;
-  font-weight: 700;
-  cursor: pointer;
-  border-radius: 8px;
+  padding: 12px 30px;
+  font-size: ${({ theme }) => theme.fontSizes.body};
+  font-weight: 600;
+  border-radius: ${({ theme }) => theme.borderRadius};
   text-decoration: none;
   transition: transform 0.2s ease, background-color 0.3s ease, box-shadow 0.2s ease;
 
   &:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    transform: translateY(-2px);
+    box-shadow: ${({ theme }) => theme.boxShadow};
   }
 `;
 
@@ -68,9 +67,9 @@ const GoogleButton = styled(CTAButton)`
 `;
 
 const GuestButton = styled(CTAButton)`
-  background-color: #e0e0e0;
-  color: #333;
-  &:hover { background-color: #d5d5d5; }
+  background-color: ${({ theme }) => theme.colors.border};
+  color: ${({ theme }) => theme.colors.text};
+  &:hover { background-color: #d1d5db; } // Tailwind Gray 300
 `;
 
 const HomePage = () => {
@@ -97,7 +96,7 @@ const HomePage = () => {
   return (
     <HomeContainer>
       <Title>AI.stretch</Title>
-      <Subtitle>AIがあなたのためのストレッチを提案するパーソナルトレーナー</Subtitle>
+      <Subtitle>あなたのためのストレッチを提案するAIパーソナルトレーナー</Subtitle>
       <ButtonContainer>
         <GoogleButton onClick={handleGoogleLogin}>Googleでログイン</GoogleButton>
         <GuestButton onClick={handleGuestLogin}>ゲストとして始める</GuestButton>

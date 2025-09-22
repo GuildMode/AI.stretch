@@ -12,11 +12,16 @@ const GUEST_STORAGE_KEY = 'guest-user-data';
  * or localStorage (for guests).
  */
 const useUserDataSync = () => {
-  const { user, isGuest } = useAuthStore();
+  const { user, isGuest, isLoading } = useAuthStore();
   const { setUserData, reset, ...userData } = useUserStore();
 
   // 1. Fetch data when auth state changes (login, logout, become guest)
   useEffect(() => {
+    // Guard clause: Do not run if auth state is still loading.
+    if (isLoading) {
+      return;
+    }
+
     if (user?.uid) {
       console.log(`User logged in: ${user.uid}. Fetching data from Firestore...`);
       getUserDocument(user.uid).then(data => {
@@ -48,7 +53,7 @@ const useUserDataSync = () => {
       console.log("User logged out, resetting state.");
       reset();
     }
-  }, [user, isGuest, setUserData, reset]);
+  }, [user, isGuest, setUserData, reset, isLoading]);
 
   // 2. Create a debounced function to save data.
   // This prevents excessive writes to the database/localStorage on every small state change.

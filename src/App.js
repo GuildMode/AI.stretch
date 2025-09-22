@@ -6,11 +6,17 @@ import useAuthStore from './store/authStore';
 import { initializeFirebase } from './firebase';
 import useUserDataSync from './hooks/useUserDataSync';
 
+import { ThemeProvider } from 'styled-components';
+import { getTheme } from './styles/theme';
+import { GlobalStyle } from './styles/GlobalStyle';
+import useUiStore from './store/uiStore';
+
 // Pages
 import HomePage from './pages/HomePage';
 import DashboardPage from './pages/DashboardPage';
 import StretchListPage from './pages/StretchListPage';
-import ProfilePage from './pages/ProfilePage';
+import SettingsPage from './pages/SettingsPage';
+import ActivityHistoryPage from './pages/ActivityHistoryPage';
 import StretchDetailPage from './pages/StretchDetailPage';
 import StretchSetupPage from './pages/StretchSetupPage';
 import StretchExecutionPage from './pages/StretchExecutionPage';
@@ -37,6 +43,8 @@ const LoadingScreen = styled.div`
 function App() {
   const [isAppInitialized, setAppInitialized] = useState(false);
   const listenToAuthChanges = useAuthStore(state => state.listenToAuthChanges);
+  const themeMode = useUiStore(state => state.themeMode);
+  const activeTheme = getTheme(themeMode);
 
   // This effect runs once on app startup to initialize services.
   useEffect(() => {
@@ -65,26 +73,30 @@ function App() {
   }
 
   return (
-    <Router>
-      <Header />
-      <main>
-        <AppContainer>
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/dashboard" element={<DashboardPage />} />
-            <Route path="/stretch" element={<StretchListPage />} />
-            <Route path="/stretch/setup" element={<StretchSetupPage />} />
-            <Route path="/stretch/play" element={<StretchExecutionPage />} />
-            <Route path="/stretch/:id" element={<StretchDetailPage />} />
-            <Route path="/profile" element={<ProfilePage />} />
-            {process.env.NODE_ENV === 'development' && (
-              <Route path="/developer" element={<DeveloperPage />} />
-            )}
-          </Routes>
-        </AppContainer>
-      </main>
-      <Modal />
-    </Router>
+    <ThemeProvider theme={activeTheme}>
+      <GlobalStyle />
+      <Router>
+        <Header />
+        <main>
+          <AppContainer>
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/dashboard" element={<DashboardPage />} />
+              <Route path="/stretch" element={<StretchListPage />} />
+              <Route path="/stretch/setup" element={<StretchSetupPage />} />
+              <Route path="/stretch/play" element={<StretchExecutionPage />} />
+              <Route path="/stretch/:id" element={<StretchDetailPage />} />
+              <Route path="/history" element={<ActivityHistoryPage />} />
+              <Route path="/settings" element={<SettingsPage />} />
+              {process.env.NODE_ENV === 'development' && (
+                <Route path="/developer" element={<DeveloperPage />} />
+              )}
+            </Routes>
+          </AppContainer>
+        </main>
+        <Modal />
+      </Router>
+    </ThemeProvider>
   );
 }
 
