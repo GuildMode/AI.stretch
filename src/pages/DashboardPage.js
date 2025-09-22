@@ -12,12 +12,6 @@ const DashboardContainer = styled.div`
   margin: 0 auto;
 `;
 
-const Title = styled.h1`
-  color: ${({ theme }) => theme.colors.text};
-  font-size: ${({ theme }) => theme.fontSizes.h1};
-  margin-bottom: ${({ theme }) => theme.spacing.large};
-`;
-
 const SectionHeader = styled.div`
   display: flex;
   justify-content: space-between;

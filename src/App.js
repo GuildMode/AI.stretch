@@ -20,7 +20,9 @@ import ActivityHistoryPage from './pages/ActivityHistoryPage';
 import StretchDetailPage from './pages/StretchDetailPage';
 import StretchSetupPage from './pages/StretchSetupPage';
 import StretchExecutionPage from './pages/StretchExecutionPage';
+import SessionCompletionPage from './pages/SessionCompletionPage';
 import DeveloperPage from './pages/DeveloperPage';
+import DeveloperRoute from './components/DeveloperRoute';
 
 // Components
 import Header from './components/Header';
@@ -85,12 +87,13 @@ function App() {
               <Route path="/stretch" element={<StretchListPage />} />
               <Route path="/stretch/setup" element={<StretchSetupPage />} />
               <Route path="/stretch/play" element={<StretchExecutionPage />} />
+              <Route path="/stretch/complete" element={<SessionCompletionPage />} />
               <Route path="/stretch/:id" element={<StretchDetailPage />} />
               <Route path="/history" element={<ActivityHistoryPage />} />
               <Route path="/settings" element={<SettingsPage />} />
-              {process.env.NODE_ENV === 'development' && (
+              <Route element={<DeveloperRoute />}>
                 <Route path="/developer" element={<DeveloperPage />} />
-              )}
+              </Route>
             </Routes>
           </AppContainer>
         </main>

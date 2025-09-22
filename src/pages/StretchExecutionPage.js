@@ -197,18 +197,27 @@ const StretchExecutionPage = () => {
   const intervalRef = useRef(null);
 
   const finishSession = useCallback(() => {
-    const totalDuration = (duration * playlist.length) + (rest * (playlist.length - 1));
+    // Calculate the actual duration based on completed stretches and rests
+    let actualDuration = 0;
+    if (currentIndex > 0) {
+      actualDuration += currentIndex * duration; // Add completed stretches duration
+      actualDuration += (isResting ? currentIndex : currentIndex - 1) * rest; // Add completed rests duration
+    }
+    // Add time spent in the current segment
+    const timeInCurrentSegment = (isResting ? duration : duration) - timeLeft;
+    if (!isResting) actualDuration += timeInCurrentSegment;
+
     const activity = {
       id: Date.now(),
       date: new Date().toISOString(),
       playlist,
       duration,
       rest,
-      totalDuration,
+      totalDuration: actualDuration, // Use the actual calculated duration
     };
     addActivity(activity);
-    navigate('/stretch/setup', { state: { finished: true } });
-  }, [playlist, duration, rest, addActivity, navigate]);
+    navigate('/stretch/complete', { state: { totalDuration: actualDuration, playlist } });
+  }, [playlist, duration, rest, addActivity, navigate, currentIndex, isResting, timeLeft]);
 
   const handleNext = useCallback(() => {
     if (isResting) { // Rest is over, start next stretch

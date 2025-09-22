@@ -121,6 +121,32 @@ const SaveButton = styled.button`
   }
 `;
 
+const StatsGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: ${({ theme }) => theme.spacing.medium};
+  margin-top: ${({ theme }) => theme.spacing.large};
+`;
+
+const StatCard = styled.div`
+  background: ${({ theme }) => theme.colors.background};
+  padding: ${({ theme }) => theme.spacing.medium};
+  border-radius: ${({ theme }) => theme.borderRadius};
+  text-align: center;
+
+  h4 {
+    font-size: 1.8rem;
+    margin: 0 0 0.5rem 0;
+    color: ${({ theme }) => theme.colors.primary};
+  }
+
+  p {
+    font-size: 0.9rem;
+    color: ${({ theme }) => theme.colors.textSecondary};
+    margin: 0;
+  }
+`;
+
 // --- Theme Toggle Switch ---
 const ThemeSwitchLabel = styled.label`
   display: flex;
@@ -175,10 +201,27 @@ const SettingsPage = () => {
   const { 
     userProfile, 
     setUserProfile, 
-    resetUserProfile 
+    resetUserProfile, 
+    activityHistory
   } = useUserStore();
 
   const [profileInput, setProfileInput] = useState(userProfile);
+
+  const stats = React.useMemo(() => {
+    if (!activityHistory || activityHistory.length === 0) {
+      return { registrationDate: null, stretchDays: 0, totalStretches: 0, totalDuration: 0 };
+    }
+
+    const sortedHistory = [...activityHistory].sort((a, b) => new Date(a.date) - new Date(b.date));
+    const firstDay = new Date(sortedHistory[0].date);
+    const registrationDate = firstDay.toLocaleDateString('ja-JP');
+
+    const stretchDays = new Set(activityHistory.map(a => new Date(a.date).toDateString())).size;
+    const totalStretches = activityHistory.reduce((sum, a) => sum + a.playlist.length, 0);
+    const totalDuration = activityHistory.reduce((sum, a) => sum + a.totalDuration, 0);
+
+    return { registrationDate, stretchDays, totalStretches, totalDuration };
+  }, [activityHistory]);
 
   useEffect(() => {
     setProfileInput(userProfile);
@@ -224,8 +267,28 @@ const SettingsPage = () => {
         </SectionHeader>
         <UserInfo>
           {user && <UserAvatar src={user.photoURL} alt="User avatar" />}
-          <UserName>{user ? user.displayName : (isGuest ? 'ゲストユーザー' : '未ログイン')}</UserName>
+          <div>
+            <UserName>{user ? user.displayName : (isGuest ? 'ゲストユーザー' : '未ログイン')}</UserName>
+            {user && <p style={{ margin: '4px 0 0 0', fontSize: '0.9rem' }}>{user.email}</p>}
+            {stats.registrationDate && <p style={{ margin: '4px 0 0 0', fontSize: '0.9rem' }}>登録日: {stats.registrationDate}</p>}
+          </div>
         </UserInfo>
+        {activityHistory.length > 0 && (
+          <StatsGrid>
+            <StatCard>
+              <h4>{stats.stretchDays}</h4>
+              <p>ストレッチ日数</p>
+            </StatCard>
+            <StatCard>
+              <h4>{stats.totalStretches}</h4>
+              <p>ストレッチ回数</p>
+            </StatCard>
+            <StatCard>
+              <h4>{Math.floor(stats.totalDuration / 60)}<span style={{fontSize: '1rem'}}>分</span></h4>
+              <p>ストレッチ時間</p>
+            </StatCard>
+          </StatsGrid>
+        )}
       </Section>
 
       <Section>
