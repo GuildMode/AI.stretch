@@ -94,7 +94,6 @@ const AIChat = () => {
     setAiSuggestions,
     chatMessages,
     addChatMessage,
-    setChatMessages,
   } = useUserStore();
   
   const stretches = useStretchStore(state => state.stretches);
