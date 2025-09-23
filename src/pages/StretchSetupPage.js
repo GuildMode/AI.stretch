@@ -17,6 +17,11 @@ const FilterIcon = () => (
 // --- STYLED COMPONENTS ---
 const PageContainer = styled.div`
   padding: ${({ theme }) => theme.spacing.large} ${({ theme }) => theme.spacing.medium};
+  padding-bottom: 120px; /* For BottomBar */
+
+  @media (max-width: 768px) {
+    padding: ${({ theme }) => theme.spacing.medium} ${({ theme }) => theme.spacing.small} 120px;
+  }
 `;
 
 const Title = styled.h1`
@@ -26,14 +31,75 @@ const Title = styled.h1`
   font-size: ${({ theme }) => theme.fontSizes.h1};
 `;
 
-const MainLayout = styled.div`
-  display: grid;
-  grid-template-columns: 1fr; /* Single column for mobile */
-  gap: ${({ theme }) => theme.spacing.large};
+const BottomBar = styled.div`
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: ${({ theme }) => theme.colors.surface};
+  border-top: 1px solid ${({ theme }) => theme.colors.border};
+  padding: ${({ theme }) => theme.spacing.medium};
+  z-index: 90;
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spacing.medium};
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.05);
+`;
 
-  @media (min-width: 1024px) {
-    grid-template-columns: 1fr 350px; /* Two columns for desktop */
-  }
+const BarSummary = styled.div`
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  color: ${({ theme }) => theme.colors.textSecondary};
+`;
+
+const BarActions = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr 2fr;
+  gap: ${({ theme }) => theme.spacing.small};
+`;
+
+const SettingsPanel = styled.div`
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: ${({ theme }) => theme.colors.surface};
+  border-top: 1px solid ${({ theme }) => theme.colors.border};
+  padding: ${({ theme }) => theme.spacing.large};
+  z-index: 100;
+  transform: ${props => (props.isOpen ? 'translateY(0)' : 'translateY(100%)')};
+  transition: transform 0.3s ease-in-out;
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+  max-height: 80vh;
+  overflow-y: auto;
+`;
+
+const PanelHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+`;
+
+const PanelTitle = styled.h2`
+  margin: 0;
+  font-size: 1.5rem;
+`;
+
+const ClosePanelButton = styled.button`
+  background: none; border: none; font-size: 1.8rem; cursor: pointer; color: ${({ theme }) => theme.colors.textSecondary};
+`;
+
+const SettingsContent = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+`;
+
+const MainLayout = styled.div`
+  max-width: 1200px;
+  margin: 0 auto;
 `;
 
 const StretchListContainer = styled.div``;
@@ -42,6 +108,12 @@ const StretchList = styled.div`
   display: flex;
   flex-direction: column;
   gap: 0.8rem;
+
+  @media (min-width: 769px) {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1rem;
+  }
 `;
 
 const StretchItem = styled.label`
@@ -55,6 +127,10 @@ const StretchItem = styled.label`
   cursor: pointer;
   transition: all 0.2s ease;
   box-shadow: ${props => (props.checked ? `0 0 0 1px ${props.theme.colors.primary}` : 'none')};
+
+  @media (min-width: 769px) {
+    min-height: 120px;
+  }
 
   &:hover {
     border-color: ${({ theme }) => theme.colors.secondary};
@@ -172,28 +248,6 @@ const CheckboxLabel = styled.label`
   input { display: none; }
 `;
 
-const ConfigPanel = styled.div`
-  background: ${({ theme }) => theme.colors.surface};
-  border: 1px solid ${({ theme }) => theme.colors.border};
-  border-radius: ${({ theme }) => theme.borderRadius};
-  box-shadow: ${({ theme }) => theme.boxShadow};
-  padding: 1.5rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-
-  @media (min-width: 1024px) {
-    position: sticky;
-    top: 2rem;
-  }
-`;
-
-const ConfigTitle = styled.h2`
-  margin: 0;
-  font-size: 1.5rem;
-  color: ${({ theme }) => theme.colors.text};
-`;
-
 const InputGroup = styled.div`
   label {
     display: block;
@@ -210,19 +264,9 @@ const InputGroup = styled.div`
   }
 `;
 
-const Summary = styled.div`
-  border-top: 1px solid ${({ theme }) => theme.colors.border};
-  padding-top: 1.5rem;
-  h3 {
-    margin: 0 0 1rem 0;
-    color: ${({ theme }) => theme.colors.text};
-  }
-`;
-
 const StartButton = styled.button`
-  width: 100%;
-  padding: 1rem;
-  font-size: 1.2rem;
+  padding: 12px 28px;
+  font-size: 1.1rem;
   font-weight: bold;
   color: #fff;
   background-color: ${({ theme }) => theme.colors.primary};
@@ -235,8 +279,24 @@ const StartButton = styled.button`
   &:disabled { background-color: #bdc3c7; cursor: not-allowed; }
 `;
 
+const SettingsButton = styled(StartButton)`
+  background-color: transparent;
+  color: ${({ theme }) => theme.colors.text};
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  font-size: 1rem;
+  font-weight: 500;
+  padding: 10px 20px;
+  white-space: nowrap;
+
+  @media (max-width: 380px) {
+    font-size: 0.9rem;
+    padding: 8px 12px;
+  }
+`;
+
 const SaveButton = styled(StartButton)`
   background-color: ${({ theme }) => theme.colors.accent};
+  width: 100%;
 `;
 
 const SavedRoutinesList = styled.div`
@@ -281,9 +341,17 @@ const StretchSetupPage = () => {
   const [rest, setRest] = useState(lastStretchSettings.rest);
   
   const [isPanelOpen, setPanelOpen] = useState(false);
-  const [filters, setFilters] = useState({ targetArea: [], equipment: [] });
+  const [panelContent, setPanelContent] = useState(null); // 'time' or 'routines'
+
+  const [filters, setFilters] = useState({ targetArea: [], equipment: [], stretchType: [] });
   const filterPanelRef = useRef(null);
-  const targetAreaOptions = useMemo(() => [...new Set(stretches.flatMap(s => s.targetArea))], [stretches]);
+
+  const bodyPartGroups = {
+    '上半身': ['首', '肩', '背中', '胸', '腕', '手', 'お腹', '腰'],
+    '下半身': ['お尻', '股関節', '脚', '足'],
+    '複合': ['全身', '体側'],
+  };
+  const stretchTypeOptions = ['静的', '動的'];
   const equipmentOptions = useMemo(() => [...new Set(stretches.map(s => s.equipment).filter(Boolean))], [stretches]);
 
   const handleCheckboxChange = (category, value) => {
@@ -306,14 +374,15 @@ const StretchSetupPage = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const totalFilterCount = filters.targetArea.length + filters.equipment.length;
+  const totalFilterCount = filters.targetArea.length + filters.equipment.length + filters.stretchType.length;
 
   const sortedAndFilteredStretches = useMemo(() => {
     return stretches
       .filter(stretch => {
         const targetAreaMatch = filters.targetArea.length === 0 || stretch.targetArea.some(area => filters.targetArea.includes(area));
         const equipmentMatch = filters.equipment.length === 0 || filters.equipment.includes(stretch.equipment);
-        return targetAreaMatch && equipmentMatch;
+        const stretchTypeMatch = filters.stretchType.length === 0 || filters.stretchType.includes(stretch.stretchType);
+        return targetAreaMatch && equipmentMatch && stretchTypeMatch;
       })
       .sort((a, b) => (b.isFavorite ? 1 : 0) - (a.isFavorite ? 1 : 0));
   }, [filters, stretches]);
@@ -385,6 +454,7 @@ const StretchSetupPage = () => {
     setSelectedIds(routine.stretchIds);
     setDuration(routine.duration);
     setRest(routine.rest);
+    setPanelContent(null); // Close panel after loading
   };
 
   const handleDeleteRoutine = (routineId, routineName) => {
@@ -396,114 +466,160 @@ const StretchSetupPage = () => {
     });
   };
 
+  const renderPanelContent = () => {
+    if (panelContent === 'time') {
+      return (
+        <>
+          <PanelHeader>
+            <PanelTitle>時間を設定</PanelTitle>
+            <ClosePanelButton onClick={() => setPanelContent(null)}>&times;</ClosePanelButton>
+          </PanelHeader>
+          <SettingsContent>
+            <InputGroup>
+              <label htmlFor="duration">実行時間 (秒)</label>
+              <input id="duration" type="number" value={duration} onChange={e => setDuration(Number(e.target.value))} min="10" />
+            </InputGroup>
+            <InputGroup>
+              <label htmlFor="rest">休憩時間 (秒)</label>
+              <input id="rest" type="number" value={rest} onChange={e => setRest(Number(e.target.value))} min="5" />
+            </InputGroup>
+          </SettingsContent>
+        </>
+      );
+    }
+    if (panelContent === 'routines') {
+      return (
+        <>
+          <PanelHeader>
+            <PanelTitle>メニューの管理</PanelTitle>
+            <ClosePanelButton onClick={() => setPanelContent(null)}>&times;</ClosePanelButton>
+          </PanelHeader>
+          <SettingsContent>
+            <SaveButton onClick={handleSaveRoutine} disabled={selectedIds.length === 0}>
+              現在のメニューを保存
+            </SaveButton>
+            {savedRoutines.length > 0 && (
+              <SavedRoutinesList>
+                <h3>保存したメニュー</h3>
+                {savedRoutines.map(routine => (
+                  <RoutineItem key={routine.id}>
+                    <span onClick={() => handleLoadRoutine(routine)} style={{ cursor: 'pointer' }}>{routine.name}</span>
+                    <IconButton onClick={() => handleDeleteRoutine(routine.id, routine.name)}>
+                      <FontAwesomeIcon icon={faTrash} />
+                    </IconButton>
+                  </RoutineItem>
+                ))}
+              </SavedRoutinesList>
+            )}
+          </SettingsContent>
+        </>
+      );
+    }
+    return null;
+  };
+
   return (
-    <PageContainer>
-      <Title>ストレッチの準備</Title>
-      <MainLayout>
-        <StretchListContainer>
-          <h2>ストレッチを選択</h2>
-          <FilterControls>
-            <FilterButtonWrapper ref={filterPanelRef}>
-              <FilterButton onClick={() => setPanelOpen(prev => !prev)}>
-                <FilterIcon />
-                <span>フィルター</span>
-                {totalFilterCount > 0 && <FilterCountBadge>{totalFilterCount}</FilterCountBadge>}
-              </FilterButton>
-              <FilterPanel isOpen={isPanelOpen}>
-                 <CheckboxGroup>
-                  <h3>部位で絞り込む</h3>
-                  <CheckboxContainer>
-                    {targetAreaOptions.map(area => (
-                      <CheckboxLabel key={area} checked={filters.targetArea.includes(area)}>
-                        <input type="checkbox" checked={filters.targetArea.includes(area)} onChange={() => handleCheckboxChange('targetArea', area)} />
-                        {area}
-                      </CheckboxLabel>
-                    ))}
-                  </CheckboxContainer>
-                </CheckboxGroup>
-                <CheckboxGroup>
-                  <h3>道具で絞り込む</h3>
-                  <CheckboxContainer>
-                    {equipmentOptions.map(eq => (
-                      <CheckboxLabel key={eq} checked={filters.equipment.includes(eq)}>
-                        <input type="checkbox" checked={filters.equipment.includes(eq)} onChange={() => handleCheckboxChange('equipment', eq)} />
-                        {eq}
-                      </CheckboxLabel>
-                    ))}
-                  </CheckboxContainer>
-                </CheckboxGroup>
-              </FilterPanel>
-            </FilterButtonWrapper>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <input type="checkbox" checked={showTagsInSetup} onChange={toggleShowTagsInSetup} />
-              タグを表示
-            </label>
-          </FilterControls>
-          <StretchList>
-            {sortedAndFilteredStretches.map(stretch => (
-              <StretchItem key={stretch.id} checked={selectedIds.includes(stretch.id)}>
-                <input
-                  type="checkbox"
-                  checked={selectedIds.includes(stretch.id)}
-                  onChange={() => handleSelect(stretch.id)}
-                  style={{ marginTop: '4px' }}
-                />
-                <StretchInfo>
-                  <span>{stretch.name}</span>
-                  {showTagsInSetup && (
-                    <TagsContainer>
-                      {stretch.targetArea.map(area => <Tag key={area}>{area}</Tag>)} 
-                      {stretch.equipment && stretch.equipment !== 'なし' && (
-                        <Tag type="equipment">&#x1F6E0; {stretch.equipment}</Tag>
-                      )}
-                    </TagsContainer>
-                  )}
-                </StretchInfo>
-                {stretch.isFavorite && <FavoriteIcon icon={faStar} />}
-              </StretchItem>
-            ))}
-          </StretchList>
-        </StretchListContainer>
+    <>
+      <PageContainer>
+        <Title>ストレッチの準備</Title>
+        <MainLayout>
+          <StretchListContainer>
+            <h2>ストレッチを選択</h2>
+            <FilterControls>
+              <FilterButtonWrapper ref={filterPanelRef}>
+                <FilterButton onClick={() => setPanelOpen(prev => !prev)}>
+                  <FilterIcon />
+                  <span>フィルター</span>
+                  {totalFilterCount > 0 && <FilterCountBadge>{totalFilterCount}</FilterCountBadge>}
+                </FilterButton>
+                                <FilterPanel isOpen={isPanelOpen}>
+                                  {Object.entries(bodyPartGroups).map(([groupName, areas]) => (
+                                    <CheckboxGroup key={groupName}>
+                                      <h3>{groupName}</h3>
+                                      <CheckboxContainer>
+                                        {areas.map(area => (
+                                          <CheckboxLabel key={area} checked={filters.targetArea.includes(area)}>
+                                            <input type="checkbox" checked={filters.targetArea.includes(area)} onChange={() => handleCheckboxChange('targetArea', area)} />
+                                            {area}
+                                          </CheckboxLabel>
+                                        ))}
+                                      </CheckboxContainer>
+                                    </CheckboxGroup>
+                                  ))}
+                                  <CheckboxGroup>
+                                    <h3>種類で絞り込む</h3>
+                                    <CheckboxContainer>
+                                      {stretchTypeOptions.map(type => (
+                                        <CheckboxLabel key={type} checked={filters.stretchType.includes(type)}>
+                                          <input type="checkbox" checked={filters.stretchType.includes(type)} onChange={() => handleCheckboxChange('stretchType', type)} />
+                                          {type}
+                                        </CheckboxLabel>
+                                      ))}
+                                    </CheckboxContainer>
+                                  </CheckboxGroup>
+                                  <CheckboxGroup>
+                                    <h3>道具で絞り込む</h3>
+                                    <CheckboxContainer>
+                                      {equipmentOptions.map(eq => (
+                                        <CheckboxLabel key={eq} checked={filters.equipment.includes(eq)}>
+                                          <input type="checkbox" checked={filters.equipment.includes(eq)} onChange={() => handleCheckboxChange('equipment', eq)} />
+                                          {eq}
+                                        </CheckboxLabel>
+                                      ))}
+                                    </CheckboxContainer>
+                                  </CheckboxGroup>
+                                </FilterPanel>              </FilterButtonWrapper>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <input type="checkbox" checked={showTagsInSetup} onChange={toggleShowTagsInSetup} />
+                タグを表示
+              </label>
+            </FilterControls>
+            <StretchList>
+              {sortedAndFilteredStretches.map(stretch => (
+                <StretchItem key={stretch.id} checked={selectedIds.includes(stretch.id)}>
+                  <input
+                    type="checkbox"
+                    checked={selectedIds.includes(stretch.id)}
+                    onChange={() => handleSelect(stretch.id)}
+                    style={{ marginTop: '4px' }}
+                  />
+                  <StretchInfo>
+                    <span>{stretch.name}</span>
+                    {showTagsInSetup && (
+                      <TagsContainer>
+                        {stretch.targetArea.map(area => <Tag key={area}>{area}</Tag>)} 
+                        {stretch.equipment && stretch.equipment !== 'なし' && (
+                          <Tag type="equipment">&#x1F6E0; {stretch.equipment}</Tag>
+                        )}
+                      </TagsContainer>
+                    )}
+                  </StretchInfo>
+                  {stretch.isFavorite && <FavoriteIcon icon={faStar} />}
+                </StretchItem>
+              ))}
+            </StretchList>
+          </StretchListContainer>
+        </MainLayout>
+      </PageContainer>
 
-        <ConfigPanel>
-          <ConfigTitle>時間を設定</ConfigTitle>
-          <InputGroup>
-            <label htmlFor="duration">実行時間 (秒)</label>
-            <input id="duration" type="number" value={duration} onChange={e => setDuration(Number(e.target.value))} min="10" />
-          </InputGroup>
-          <InputGroup>
-            <label htmlFor="rest">休憩時間 (秒)</label>
-            <input id="rest" type="number" value={rest} onChange={e => setRest(Number(e.target.value))} min="5" />
-          </InputGroup>
-
-          <Summary>
-            <h3>合計時間: {Math.floor(totalTime / 60)}分 {totalTime % 60}秒</h3>
-            <p>選択したストレッチ: {selectedIds.length}個</p>
-          </Summary>
-
+      <BottomBar>
+        <BarSummary>
+          <span>選択中: {selectedIds.length}個</span>
+          <span>合計時間: {Math.floor(totalTime / 60)}分 {totalTime % 60}秒</span>
+        </BarSummary>
+        <BarActions>
+          <SettingsButton onClick={() => setPanelContent('time')}>時間設定</SettingsButton>
+          <SettingsButton onClick={() => setPanelContent('routines')}>メニュー</SettingsButton>
           <StartButton onClick={handleStart} disabled={selectedIds.length === 0}>
             スタート
           </StartButton>
-          <SaveButton onClick={handleSaveRoutine} disabled={selectedIds.length === 0}>
-            このメニューを保存
-          </SaveButton>
-          
-          {savedRoutines.length > 0 && (
-            <SavedRoutinesList>
-              <h3>保存したメニュー</h3>
-              {savedRoutines.map(routine => (
-                <RoutineItem key={routine.id}>
-                  <span onClick={() => handleLoadRoutine(routine)} style={{ cursor: 'pointer' }}>{routine.name}</span>
-                  <IconButton onClick={() => handleDeleteRoutine(routine.id, routine.name)}>
-                    <FontAwesomeIcon icon={faTrash} />
-                  </IconButton>
-                </RoutineItem>
-              ))}
-            </SavedRoutinesList>
-          )}
-        </ConfigPanel>
-      </MainLayout>
-    </PageContainer>
+        </BarActions>
+      </BottomBar>
+
+      <SettingsPanel isOpen={panelContent !== null}>
+        {renderPanelContent()}
+      </SettingsPanel>
+    </>
   );
 };
 

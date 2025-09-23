@@ -26,6 +26,8 @@ const lightTheme = {
     primary: '#2563EB',      // ブルー
     secondary: '#60A5FA',    // ライトブルー
     accent: '#F59E0B',        // オレンジ
+    success: '#10B981',      // グリーン
+    purple: '#8B5CF6',       // パープル
     text: '#1F2937',         // ダークグレー (Text)
     textSecondary: '#6B7280', // ミディアムグレー (Text)
     background: '#F9FAFB',    // オフホワイト (Background)
@@ -41,6 +43,8 @@ const darkTheme = {
     primary: '#3B82F6',      // Bright Blue
     secondary: '#60A5FA',    // Lighter Blue
     accent: '#FBBF24',        // Bright Orange
+    success: '#34D399',      // Bright Green
+    purple: '#A78BFA',       // Bright Purple
     text: '#F9FAFB',         // Light Gray (Text)
     textSecondary: '#9CA3AF', // Medium Gray (Text)
     background: '#111827',    // Dark Blue-Gray (Background)

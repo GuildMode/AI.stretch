@@ -8,24 +8,39 @@ import { useStretchStore } from '../store/stretchStore';
 
 const DashboardContainer = styled.div`
   padding: ${({ theme }) => theme.spacing.large} ${({ theme }) => theme.spacing.medium};
-  max-width: 1200px;
-  margin: 0 auto;
+
+  @media (max-width: 768px) {
+    padding: ${({ theme }) => theme.spacing.medium} 0;
+  }
 `;
 
 const SectionHeader = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: ${({ theme }) => theme.spacing.large};
   margin-top: ${({ theme }) => theme.spacing.xlarge};
   margin-bottom: ${({ theme }) => theme.spacing.medium};
   border-bottom: 2px solid ${({ theme }) => theme.colors.border};
   padding-bottom: ${({ theme }) => theme.spacing.small};
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: ${({ theme }) => theme.spacing.medium};
+    margin-top: ${({ theme }) => theme.spacing.large};
+  }
 `;
 
 const SectionTitle = styled.h2`
   font-size: ${({ theme }) => theme.fontSizes.h2};
   color: ${({ theme }) => theme.colors.text};
   margin: 0;
+  white-space: nowrap;
+
+  @media (max-width: 768px) {
+    font-size: ${({ theme }) => theme.fontSizes.h3};
+  }
 `;
 
 const ExecuteButton = styled.button`
@@ -41,21 +56,10 @@ const ExecuteButton = styled.button`
 
   &:hover { opacity: 0.9; }
   &:disabled { background-color: #bdc3c7; cursor: not-allowed; }
-`;
 
-const NewChatButton = styled.button`
-  padding: 10px 20px;
-  font-size: ${({ theme }) => theme.fontSizes.body};
-  font-weight: 600;
-  color: ${({ theme }) => theme.colors.textSecondary};
-  background-color: ${({ theme }) => theme.colors.surface};
-  border: 1px solid ${({ theme }) => theme.colors.border};
-  border-radius: ${({ theme }) => theme.borderRadius};
-  cursor: pointer;
-  transition: background-color 0.2s ease-in-out;
-
-  &:hover {
-    background-color: ${({ theme }) => theme.colors.background};
+  @media (max-width: 768px) {
+    width: 100%;
+    padding: 12px 20px;
   }
 `;
 
@@ -115,7 +119,7 @@ const EquipmentTag = styled(Tag)`
 
 const DashboardPage = () => {
   const navigate = useNavigate();
-  const { aiSuggestions, savedRoutines, resetChat } = useUserStore();
+  const { aiSuggestions, savedRoutines } = useUserStore();
   const stretches = useStretchStore((state) => state.stretches);
 
   const suggestedStretches = React.useMemo(() => {
@@ -144,8 +148,7 @@ const DashboardPage = () => {
 
       <SectionHeader>
         <SectionTitle>AIから提案されたストレッチ</SectionTitle>
-        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-          <NewChatButton onClick={resetChat}>新しいチャット</NewChatButton>
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', justifyContent: 'flex-end', flexGrow: 1 }}>
           {suggestedStretches.length > 0 && (
               <ExecuteButton onClick={handleExecuteAISuggestions}>
                 すべて実行

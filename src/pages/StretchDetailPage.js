@@ -35,7 +35,6 @@ const NameContainer = styled.div`
 const StretchName = styled.h1`
   font-size: ${({ theme }) => theme.fontSizes.h1};
   color: ${({ theme }) => theme.colors.text};
-  margin-bottom: 10px;
   margin: 0;
 `;
 
@@ -45,6 +44,7 @@ const FavoriteButton = styled.button`
   cursor: pointer;
   font-size: 1.6rem;
   color: ${({ theme }) => theme.colors.accent};
+  margin-left: auto; /* Push to the right */
 `;
 
 const TagContainer = styled.div`
@@ -118,8 +118,8 @@ const StretchDetailPage = () => {
   const { stretches, toggleFavorite } = useStretchStore();
   const stretch = stretches.find(s => s.id === id);
 
-  const handleTagClick = (area) => {
-    navigate('/stretch', { state: { initialFilter: area } });
+  const handleTagClick = (category, value) => {
+    navigate('/stretch', { state: { initialFilter: { category, value } } });
   };
 
   if (!stretch) {
@@ -142,10 +142,10 @@ const StretchDetailPage = () => {
         </NameContainer>
         <TagContainer>
           {stretch.targetArea.map(area => 
-            <Tag key={area} onClick={() => handleTagClick(area)}>{area}</Tag>
+            <Tag key={area} onClick={() => handleTagClick('targetArea', area)}>{area}</Tag>
           )}
           {stretch.equipment && stretch.equipment !== 'なし' && (
-            <Tag as="span" type="equipment">&#x1F6E0; {stretch.equipment}</Tag>
+            <Tag type="equipment" onClick={() => handleTagClick('equipment', stretch.equipment)}>&#x1F6E0; {stretch.equipment}</Tag>
           )}
         </TagContainer>
       </StretchHeader>

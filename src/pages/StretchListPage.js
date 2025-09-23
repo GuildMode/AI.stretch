@@ -231,6 +231,7 @@ const StretchListPage = () => {
   const [filters, setFilters] = useState({
     targetArea: [],
     equipment: [],
+    stretchType: [],
   });
   const filterPanelRef = useRef(null);
   const navigate = useNavigate();
@@ -238,16 +239,23 @@ const StretchListPage = () => {
   const { stretches, toggleFavorite } = useStretchStore();
 
   useEffect(() => {
-    if (location.state?.initialFilter) {
+    const { initialFilter } = location.state || {};
+    if (initialFilter && initialFilter.category && initialFilter.value) {
       setFilters(prev => ({
         ...prev,
-        targetArea: [location.state.initialFilter]
+        [initialFilter.category]: [initialFilter.value]
       }));
+      // Clear the state from location to prevent re-applying on refresh
       navigate(location.pathname, { replace: true, state: {} });
     }
   }, [location, navigate]);
 
-  const targetAreaOptions = useMemo(() => [...new Set(stretches.flatMap(s => s.targetArea))], [stretches]);
+  const bodyPartGroups = {
+    '上半身': ['首', '肩', '背中', '胸', '腕', '手', 'お腹', '腰'],
+    '下半身': ['お尻', '股関節', '脚', '足'],
+    '複合': ['全身', '体側'],
+  };
+  const stretchTypeOptions = ['静的', '動的'];
   const equipmentOptions = useMemo(() => [...new Set(stretches.map(s => s.equipment).filter(Boolean))], [stretches]);
 
   const handleCheckboxChange = (category, value) => {
@@ -265,7 +273,8 @@ const StretchListPage = () => {
       .filter(stretch => {
         const targetAreaMatch = filters.targetArea.length === 0 || stretch.targetArea.some(area => filters.targetArea.includes(area));
         const equipmentMatch = filters.equipment.length === 0 || filters.equipment.includes(stretch.equipment);
-        return targetAreaMatch && equipmentMatch;
+        const stretchTypeMatch = filters.stretchType.length === 0 || filters.stretchType.includes(stretch.stretchType);
+        return targetAreaMatch && equipmentMatch && stretchTypeMatch;
       })
       .sort((a, b) => (b.isFavorite ? 1 : 0) - (a.isFavorite ? 1 : 0));
   }, [filters, stretches]);
@@ -286,7 +295,7 @@ const StretchListPage = () => {
     toggleFavorite(stretchId);
   };
 
-  const totalFilterCount = filters.targetArea.length + filters.equipment.length;
+  const totalFilterCount = filters.targetArea.length + filters.equipment.length + filters.stretchType.length;
 
   return (
     <StretchListContainer>
@@ -305,32 +314,36 @@ const StretchListPage = () => {
         </FilterButton>
 
         <FilterPanel isOpen={isPanelOpen}>
+          {Object.entries(bodyPartGroups).map(([groupName, areas]) => (
+            <CheckboxGroup key={groupName}>
+              <h3>{groupName}</h3>
+              <CheckboxContainer>
+                {areas.map(area => (
+                  <CheckboxLabel key={area} checked={filters.targetArea.includes(area)}>
+                    <input type="checkbox" checked={filters.targetArea.includes(area)} onChange={() => handleCheckboxChange('targetArea', area)} />
+                    {area}
+                  </CheckboxLabel>
+                ))}
+              </CheckboxContainer>
+            </CheckboxGroup>
+          ))}
           <CheckboxGroup>
-            <h3>部位で絞り込む</h3>
+            <h3>種類で絞り込む</h3>
             <CheckboxContainer>
-              {targetAreaOptions.map(area => (
-                <CheckboxLabel key={area} checked={filters.targetArea.includes(area)}>
-                  <input
-                    type="checkbox"
-                    checked={filters.targetArea.includes(area)}
-                    onChange={() => handleCheckboxChange('targetArea', area)}
-                  />
-                  {area}
+              {stretchTypeOptions.map(type => (
+                <CheckboxLabel key={type} checked={filters.stretchType.includes(type)}>
+                  <input type="checkbox" checked={filters.stretchType.includes(type)} onChange={() => handleCheckboxChange('stretchType', type)} />
+                  {type}
                 </CheckboxLabel>
               ))}
             </CheckboxContainer>
           </CheckboxGroup>
-
           <CheckboxGroup>
             <h3>道具で絞り込む</h3>
             <CheckboxContainer>
               {equipmentOptions.map(eq => (
                 <CheckboxLabel key={eq} checked={filters.equipment.includes(eq)}>
-                  <input
-                    type="checkbox"
-                    checked={filters.equipment.includes(eq)}
-                    onChange={() => handleCheckboxChange('equipment', eq)}
-                  />
+                  <input type="checkbox" checked={filters.equipment.includes(eq)} onChange={() => handleCheckboxChange('equipment', eq)} />
                   {eq}
                 </CheckboxLabel>
               ))}
